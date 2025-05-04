@@ -1,12 +1,14 @@
 # adk-java
-An open-source, code-first Java toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control.
 
+An open-source, code-first Java toolkit for building, evaluating, and running sophisticated AI agents with flexibility
+and control.  
+adk-java is a Java implementation of Agent Develop Kit for orchestrating Multi-Agents
 
 ---
 
 ## ✨ Key Features
 
-- **Rich Framework**: Utilize any AI frameworks, eg. Langchain4j,SpringAI.
+- **Rich Framework**: Utilize any AI frameworks, eg. LangChain4j,SpringAI.
 
 - **Code-First Development**: Define agent logic, and orchestration
   directly in Java for ultimate flexibility, testability, and versioning.
