@@ -1,19 +1,19 @@
 package io.github.pheonixhkbxoic.adk.core.node;
 
 import io.github.pheonixhkbxoic.adk.core.NodeType;
-import io.github.pheonixhkbxoic.adk.core.spec.ChainNode;
+import io.github.pheonixhkbxoic.adk.core.spec.AbstractChainNode;
 
 /**
  * @author PheonixHkbxoic
  * @date 2025/5/2 01:03
  * @desc
  */
-public class EndNode extends ChainNode {
-    public static EndNode of() {
-        return new EndNode();
+public class End extends AbstractChainNode {
+    public static End of() {
+        return new End();
     }
 
-    private EndNode() {
+    private End() {
         super(null, NodeType.END, null, null);
     }
 }

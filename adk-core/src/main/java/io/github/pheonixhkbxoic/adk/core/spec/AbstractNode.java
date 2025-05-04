@@ -3,7 +3,7 @@ package io.github.pheonixhkbxoic.adk.core.spec;
 import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.Status;
-import io.github.pheonixhkbxoic.adk.core.node.AgentNode;
+import io.github.pheonixhkbxoic.adk.core.node.Agentic;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
 import io.github.pheonixhkbxoic.adk.runtime.InvokeContext;
@@ -62,7 +62,7 @@ public abstract class AbstractNode implements Node {
 
 
     protected ExecuteContext buildContextFromParent(ExecuteContext parent, Node currNode) {
-        if (currNode instanceof AgentNode) {
+        if (currNode instanceof Agentic) {
             InvokeContext context = new InvokeContext(currNode.getName(), parent.isAsync(), parent.getPayload());
             context.setParent(parent);
             parent.setChild(context);

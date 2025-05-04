@@ -2,8 +2,8 @@ package io.github.pheonixhkbxoic.adk.test;
 
 import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.Payload;
-import io.github.pheonixhkbxoic.adk.core.node.AgentNode;
-import io.github.pheonixhkbxoic.adk.core.node.EndNode;
+import io.github.pheonixhkbxoic.adk.core.node.Agentic;
+import io.github.pheonixhkbxoic.adk.core.node.End;
 import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
@@ -62,7 +62,7 @@ public class AgentNodeTests {
     @Test
     public void testAgentNode() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
-        AgentNode agentNode = AgentNode.of(invoker, EndNode.of());
+        Agentic agentNode = Agentic.of(invoker, End.of());
         ReadonlyContext rootCtx = new ReadonlyContext("root", false, Payload.builder().build());
         ExecuteContext endCtx = agentNode.build(rootCtx).block();
         Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getChild());
@@ -77,7 +77,7 @@ public class AgentNodeTests {
     @Test
     public void testAgentNodeAsync() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
-        AgentNode agentNode = AgentNode.of(invoker, EndNode.of());
+        Agentic agentNode = Agentic.of(invoker, End.of());
         ReadonlyContext rootCtx = new ReadonlyContext("root", true, Payload.builder().build());
         ExecuteContext endCtx = agentNode.build(rootCtx).block();
         Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getChild());

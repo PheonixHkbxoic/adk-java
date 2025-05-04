@@ -3,11 +3,11 @@ package io.github.pheonixhkbxoic.adk.runner;
 import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.Agent;
 import io.github.pheonixhkbxoic.adk.Payload;
-import io.github.pheonixhkbxoic.adk.core.node.AgentNode;
-import io.github.pheonixhkbxoic.adk.core.node.EndNode;
-import io.github.pheonixhkbxoic.adk.core.node.StartNode;
-import io.github.pheonixhkbxoic.adk.core.spec.ChainNode;
-import io.github.pheonixhkbxoic.adk.core.spec.GraphNode;
+import io.github.pheonixhkbxoic.adk.core.node.Agentic;
+import io.github.pheonixhkbxoic.adk.core.node.End;
+import io.github.pheonixhkbxoic.adk.core.node.Graph;
+import io.github.pheonixhkbxoic.adk.core.node.Start;
+import io.github.pheonixhkbxoic.adk.core.spec.AbstractChainNode;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.event.LogEventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
@@ -34,25 +34,27 @@ public abstract class ChainRunner implements Runner {
      */
     public static Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> log.info("exception: {}", e.getMessage(), e);
 
-    protected GraphNode graphNode;
+    protected Graph graph;
     protected SessionService sessionService;
     protected Consumer<Throwable> exceptionHandler;
     protected List<EventListener> eventListenerList = new ArrayList<>();
 
 
-    protected ChainRunner(SessionService sessionService, String appName, List<Agent> agents) {
+    protected ChainRunner(SessionService sessionService, String appName, List<io.github.pheonixhkbxoic.adk.Agent> agents) {
         if (AdkUtil.isEmpty(appName)) {
-            appName = GraphNode.class.getSimpleName();
+            appName = Graph.class.getSimpleName();
         }
         this.sessionService = sessionService;
-        EndNode endNode = EndNode.of();
-        ChainNode chain = endNode;
+
+        // build graph
+        End end = End.of();
+        AbstractChainNode chain = end;
         for (int i = agents.size() - 1; i >= 0; i--) {
             Agent agent = agents.get(i);
-            chain = AgentNode.of(agent.getName(), agent.getAgentInvoker(), chain);
+            chain = Agentic.of(agent.getName(), agent.getAgentInvoker(), chain);
         }
-        StartNode startNode = StartNode.of(chain);
-        this.graphNode = new GraphNode(appName, startNode, endNode);
+        Start start = Start.of(chain);
+        this.graph = new Graph(appName, start, end);
     }
 
     @Override
@@ -61,11 +63,11 @@ public abstract class ChainRunner implements Runner {
         ExecuteContext rootContext = new ReadonlyContext("root", false, payload);
         rootContext.addEventListener(eventListenerList.toArray(EventListener[]::new));
 
-        return graphNode
+        return graph
                 // build
                 .build(rootContext)
                 // execute
-                .flatMap(end -> graphNode.execute(rootContext.getChild()))
+                .flatMap(end -> graph.execute(rootContext.getChild()))
                 .flux()
                 .flatMap(ExecuteContext::getResponseFrame)
                 .doOnError(e -> {
@@ -83,12 +85,12 @@ public abstract class ChainRunner implements Runner {
         ExecuteContext rootContext = new ReadonlyContext("root", true, payload);
         rootContext.addEventListener(eventListenerList.toArray(EventListener[]::new));
 
-        return graphNode
+        return graph
                 // build
                 .build(rootContext)
                 // execute
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap(end -> graphNode.execute(rootContext.getChild()))
+                .flatMap(end -> graph.execute(rootContext.getChild()))
                 .flux()
                 .flatMap(ExecuteContext::getResponseFrame)
                 .doOnError(e -> {

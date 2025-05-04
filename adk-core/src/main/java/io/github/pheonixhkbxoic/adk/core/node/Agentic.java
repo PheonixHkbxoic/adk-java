@@ -3,7 +3,7 @@ package io.github.pheonixhkbxoic.adk.core.node;
 import io.github.pheonixhkbxoic.adk.core.NodeType;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
-import io.github.pheonixhkbxoic.adk.core.spec.ChainNode;
+import io.github.pheonixhkbxoic.adk.core.spec.AbstractChainNode;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import io.github.pheonixhkbxoic.adk.runtime.AgentInvoker;
 
@@ -12,22 +12,22 @@ import io.github.pheonixhkbxoic.adk.runtime.AgentInvoker;
  * @date 2025/5/2 00:15
  * @desc
  */
-public class AgentNode extends ChainNode {
+public class Agentic extends AbstractChainNode {
 
-    public static AgentNode of(AgentInvoker invoker, Node next) {
+    public static Agentic of(AgentInvoker invoker, Node next) {
         return of(null, invoker, next);
     }
 
-    public static AgentNode of(String name, Node next) {
+    public static Agentic of(String name, Node next) {
         return of(name, null, next);
     }
 
-    public static AgentNode of(String name, AgentInvoker invoker, Node next) {
+    public static Agentic of(String name, AgentInvoker invoker, Node next) {
         PlainEdge plainEdge = PlainEdge.of(next);
-        return new AgentNode(name, invoker, plainEdge);
+        return new Agentic(name, invoker, plainEdge);
     }
 
-    private AgentNode(String name, AgentInvoker invoker, Edge edge) {
+    private Agentic(String name, AgentInvoker invoker, Edge edge) {
         super(name, NodeType.AGENT, invoker, edge);
     }
 

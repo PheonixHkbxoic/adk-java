@@ -24,10 +24,10 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
 @Data
-public class ChainNode extends AbstractNode {
+public abstract class AbstractChainNode extends AbstractNode {
     protected Edge edge;
 
-    public ChainNode(String name, String type, NodeInvoker invoker, Edge edge) {
+    public AbstractChainNode(String name, String type, NodeInvoker invoker, Edge edge) {
         super(name, type, invoker);
         this.edge = edge;
     }

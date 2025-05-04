@@ -2,8 +2,8 @@ package io.github.pheonixhkbxoic.adk.core.spec;
 
 import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.core.NodeType;
-import io.github.pheonixhkbxoic.adk.core.node.EndNode;
-import io.github.pheonixhkbxoic.adk.core.node.StartNode;
+import io.github.pheonixhkbxoic.adk.core.node.End;
+import io.github.pheonixhkbxoic.adk.core.node.Start;
 import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
@@ -24,23 +24,23 @@ import java.util.List;
 @Slf4j
 @Getter
 @Setter
-public class GraphNode extends AbstractNode {
-    protected StartNode startNode;
-    protected EndNode endNode;
-    protected GraphNode next;
+public abstract class AbstractGraphNode extends AbstractNode {
+    protected Start start;
+    protected End end;
+    protected AbstractGraphNode next;
 
-    public GraphNode(StartNode startNode, EndNode endNode) {
-        this(null, startNode, endNode, null);
+    public AbstractGraphNode(Start start, End end) {
+        this(null, start, end, null);
     }
 
-    public GraphNode(String name, StartNode startNode, EndNode endNode) {
-        this(name, startNode, endNode, null);
+    public AbstractGraphNode(String name, Start start, End end) {
+        this(name, start, end, null);
     }
 
-    public GraphNode(String name, StartNode startNode, EndNode endNode, GraphNode next) {
+    public AbstractGraphNode(String name, Start start, End end, AbstractGraphNode next) {
         super(name, NodeType.GRAPH);
-        this.startNode = startNode;
-        this.endNode = endNode;
+        this.start = start;
+        this.end = end;
         this.next = next;
     }
 
@@ -49,7 +49,7 @@ public class GraphNode extends AbstractNode {
 
         Mono<ExecuteContext> endContextMono = Mono.defer(() -> {
             ExecuteContext graphContext = this.buildContextFromParent(parentContext, this);
-            return startNode.build(graphContext);
+            return start.build(graphContext);
         });
 
         if (next != null) {
@@ -99,7 +99,7 @@ public class GraphNode extends AbstractNode {
         List<EventListener> listeners = context.getEventListenerList();
         return Mono.defer(() -> {
                     ExecuteContext child = context.getChild();
-                    return startNode.execute(child);
+                    return start.execute(child);
                 })
                 .doFirst(() -> {
                     Event eventBefore = Event.builder()
