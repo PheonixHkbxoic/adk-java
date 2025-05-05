@@ -35,6 +35,7 @@
         <reactor.http.version>1.2.4</reactor.http.version>
         <netty.version>4.1.119.Final</netty.version>
 
+        <plantuml.version>1.2025.2</plantuml.version>
     </properties>
 
     <dependencyManagement>
@@ -99,7 +100,13 @@
                 <scope>test</scope>
             </dependency>
 
-
+            <!-- https://mvnrepository.com/artifact/net.sourceforge.plantuml/plantuml -->
+            <!-- https://mvnrepository.com/artifact/net.sourceforge.plantuml/plantuml-mit -->
+            <dependency>
+                <groupId>net.sourceforge.plantuml</groupId>
+                <artifactId>plantuml-mit</artifactId>
+                <version>${plantuml.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

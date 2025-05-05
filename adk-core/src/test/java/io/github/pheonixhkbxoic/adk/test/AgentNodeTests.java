@@ -8,8 +8,8 @@ import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
 import io.github.pheonixhkbxoic.adk.runtime.InvokeContext;
-import io.github.pheonixhkbxoic.adk.runtime.ReadonlyContext;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
+import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -32,7 +32,7 @@ public class AgentNodeTests {
         List<EventListener> listeners = List.of();
         String nodeId = "agentNode-id", nodeName = "agentNode";
         CustomAgentInvoker invoker = new CustomAgentInvoker();
-        InvokeContext invokeContext = new InvokeContext(nodeName, Payload.builder().build());
+        InvokeContext invokeContext = new InvokeContext(nodeId, nodeName, Payload.builder().build());
         Flux<ResponseFrame> flux = invoker.invokeStream(invokeContext)
                 .doOnError(e -> {
                     Event eventAfter = Event.builder()
@@ -63,9 +63,9 @@ public class AgentNodeTests {
     public void testAgentNode() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
         Agentic agentNode = Agentic.of(invoker, End.of());
-        ReadonlyContext rootCtx = new ReadonlyContext("root", false, Payload.builder().build());
+        RootContext rootCtx = new RootContext(false, Payload.builder().build());
         ExecuteContext endCtx = agentNode.build(rootCtx).block();
-        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getChild());
+        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getActiveChild());
         contextMono.subscribe(ec -> {
             log.info("ec: {}", ec.getName());
             Flux<ResponseFrame> frames = ec.getResponseFrame();
@@ -78,9 +78,9 @@ public class AgentNodeTests {
     public void testAgentNodeAsync() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
         Agentic agentNode = Agentic.of(invoker, End.of());
-        ReadonlyContext rootCtx = new ReadonlyContext("root", true, Payload.builder().build());
+        RootContext rootCtx = new RootContext(true, Payload.builder().build());
         ExecuteContext endCtx = agentNode.build(rootCtx).block();
-        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getChild());
+        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getActiveChild());
         contextMono.subscribe(ec -> {
             log.info("ec: {}", ec.getName());
             Flux<ResponseFrame> frames = ec.getResponseFrame();

@@ -48,7 +48,7 @@ public abstract class AbstractGraphNode extends AbstractNode {
     public Mono<ExecuteContext> build(ExecuteContext parentContext) {
 
         Mono<ExecuteContext> endContextMono = Mono.defer(() -> {
-            ExecuteContext graphContext = this.buildContextFromParent(parentContext, this);
+            ExecuteContext graphContext = this.buildContextFromParent(parentContext);
             return start.build(graphContext);
         });
 
@@ -98,7 +98,7 @@ public abstract class AbstractGraphNode extends AbstractNode {
     public Mono<ExecuteContext> execute(ExecuteContext context) {
         List<EventListener> listeners = context.getEventListenerList();
         return Mono.defer(() -> {
-                    ExecuteContext child = context.getChild();
+                    ExecuteContext child = context.getActiveChild();
                     return start.execute(child);
                 })
                 .doFirst(() -> {

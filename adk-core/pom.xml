@@ -63,5 +63,10 @@
             <version>${reactor.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml-mit</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -14,13 +14,15 @@ import java.util.List;
  */
 public interface ExecuteContext extends Adk {
 
-    ExecuteContext getParent();
+    RootContext getRootContext();
 
-    void setParent(ExecuteContext parent);
+    ExecuteContext getActiveParent();
 
-    ExecuteContext getChild();
+    void setActiveParent(ExecuteContext parent);
 
-    void setChild(ExecuteContext child);
+    ExecuteContext getActiveChild();
+
+    void setActiveChild(ExecuteContext child);
 
     Payload getPayload();
 

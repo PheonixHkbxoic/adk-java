@@ -4,14 +4,15 @@ import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.Status;
 import io.github.pheonixhkbxoic.adk.core.node.Agentic;
+import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import io.github.pheonixhkbxoic.adk.runtime.InvokeContext;
-import io.github.pheonixhkbxoic.adk.runtime.NodeInvoker;
-import io.github.pheonixhkbxoic.adk.runtime.ReadonlyContext;
+import io.github.pheonixhkbxoic.adk.runtime.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
  * @author PheonixHkbxoic
@@ -26,6 +27,7 @@ public abstract class AbstractNode implements Node {
     protected String type;
     protected Status status;
     protected NodeInvoker invoker;
+    protected boolean build;
 
     public AbstractNode() {
     }
@@ -61,23 +63,105 @@ public abstract class AbstractNode implements Node {
     }
 
 
-    protected ExecuteContext buildContextFromParent(ExecuteContext parent, Node currNode) {
-        if (currNode instanceof Agentic) {
-            InvokeContext context = new InvokeContext(currNode.getName(), parent.isAsync(), parent.getPayload());
-            context.setParent(parent);
-            parent.setChild(context);
-            context.setResponseFrame(parent.getResponseFrame());
+    protected ExecuteContext buildContextFromParent(ExecuteContext parent) {
+        if (this instanceof AbstractBranchNode) {
+            BranchesInvokeContext context = new BranchesInvokeContext(this.getId(), this.getName(), parent.isAsync(), parent.getPayload());
+            if (parent instanceof AbstractBranchesExecuteContext) {
+                ((AbstractBranchesExecuteContext) parent).addChild(context);
+            } else {
+                parent.setActiveChild(context);
+            }
+            context.addParent(parent);
+
             context.addEventListener(parent.getEventListenerList().toArray(new EventListener[0]));
+
+            RootContext rootContext = parent instanceof RootContext ? ((RootContext) parent) : parent.getRootContext();
+            rootContext.cache(this.getId(), context);
+            context.setRootContext(rootContext);
             return context;
         }
 
-        // chain,branch,graph
-        ReadonlyContext context = new ReadonlyContext(currNode.getName(), parent.isAsync(), parent.getPayload());
-        parent.setChild(context);
-        context.setParent(parent);
-        context.setResponseFrame(parent.getResponseFrame());
+        if (this instanceof Agentic) {
+            InvokeContext context = new InvokeContext(this.getId(), this.getName(), parent.isAsync(), parent.getPayload());
+            context.setActiveParent(parent);
+            if (parent instanceof AbstractBranchesExecuteContext) {
+                ((AbstractBranchesExecuteContext) parent).addChild(context);
+            } else {
+                parent.setActiveChild(context);
+            }
+            context.addEventListener(parent.getEventListenerList().toArray(new EventListener[0]));
+
+            RootContext rootContext = parent instanceof RootContext ? ((RootContext) parent) : parent.getRootContext();
+            rootContext.cache(this.getId(), context);
+            context.setRootContext(rootContext);
+            return context;
+        }
+
+        // chain
+        ReadonlyContext context = new ReadonlyContext(this.getId(), this.getName(), parent.isAsync(), parent.getPayload());
+        context.setActiveParent(parent);
+        if (parent instanceof AbstractBranchesExecuteContext) {
+            ((AbstractBranchesExecuteContext) parent).addChild(context);
+        } else {
+            parent.setActiveChild(context);
+        }
         context.addEventListener(parent.getEventListenerList().toArray(new EventListener[0]));
+
+        RootContext rootContext = parent instanceof RootContext ? ((RootContext) parent) : parent.getRootContext();
+        rootContext.cache(this.getId(), context);
+        context.setRootContext(rootContext);
         return context;
+    }
+
+    protected void doInvoke(ExecuteContext context) {
+        if (this.invoker == null) {
+            return;
+        }
+        InvokeContext invokeContext = (InvokeContext) context;
+        List<EventListener> listeners = invokeContext.getEventListenerList();
+
+        Flux<ResponseFrame> flux = Flux.defer(() -> {
+                    // invoke
+                    Flux<ResponseFrame> responseFrameFlux;
+                    if (context.isAsync()) {
+                        responseFrameFlux = invoker.invokeStream(invokeContext);
+                    } else {
+                        responseFrameFlux = invoker.invoke(invokeContext).flux();
+                    }
+                    return responseFrameFlux;
+                })
+                .doFirst(() -> {
+                    Event eventBefore = Event.builder()
+                            .type(Event.Invoke)
+                            .nodeId(this.getId())
+                            .nodeName(this.getName())
+                            .stream(invokeContext.isAsync())
+                            .build();
+                    AdkUtil.notifyInvokeEvent(listeners, eventBefore, false);
+                })
+                .doOnError(e -> {
+                    Event eventAfter = Event.builder()
+                            .type(Event.Invoke)
+                            .nodeId(this.getId())
+                            .nodeName(this.getName())
+                            .stream(invokeContext.isAsync())
+                            .complete(true)
+                            .error(e)
+                            .build();
+                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
+                })
+                .doOnComplete(() -> {
+                    Event eventAfter = Event.builder()
+                            .type(Event.Invoke)
+                            .nodeId(this.getId())
+                            .nodeName(this.getName())
+                            .stream(invokeContext.isAsync())
+                            .complete(true)
+                            .build();
+                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
+                });
+        flux = Flux.fromStream(flux.toStream());
+        invokeContext.setResponseFrame(flux);
     }
 
     @Override

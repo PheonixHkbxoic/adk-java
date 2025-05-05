@@ -4,14 +4,13 @@ import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
+import io.github.pheonixhkbxoic.adk.runtime.AbstractBranchesExecuteContext;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import io.github.pheonixhkbxoic.adk.runtime.InvokeContext;
 import io.github.pheonixhkbxoic.adk.runtime.NodeInvoker;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -23,7 +22,8 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
-@Data
+@Getter
+@Setter
 public abstract class AbstractChainNode extends AbstractNode {
     protected Edge edge;
 
@@ -34,10 +34,30 @@ public abstract class AbstractChainNode extends AbstractNode {
 
     @Override
     public Mono<ExecuteContext> build(ExecuteContext parentContext) {
+        if (build) {
+            return Mono.empty();
+//            return Mono.just(parentContext.getRootContext().cache(this.getId()));
+        }
         Mono<ExecuteContext> context = Mono.defer(() -> {
-            ExecuteContext currContext = this.buildContextFromParent(parentContext, this);
+
+            ExecuteContext currContext = this.buildContextFromParent(parentContext);
+            this.build = true;
+
             return Mono.justOrEmpty(this.edge)
-                    .flatMap(e -> e.getNode().build(currContext))
+                    .flatMap(e -> {
+                        ExecuteContext block = e.getNode().build(currContext).block();
+                        if (currContext.getActiveChild() == null) {
+                            ExecuteContext child = currContext.getRootContext().cache(e.getNode().getId());
+                            currContext.setActiveChild(child);
+                            if (child instanceof AbstractBranchesExecuteContext) {
+                                ((AbstractBranchesExecuteContext) child).addParent(currContext);
+                            } else {
+                                child.setActiveParent(currContext);
+                            }
+                            return Mono.just(child);
+                        }
+                        return Mono.justOrEmpty(block);
+                    })
                     .switchIfEmpty(Mono.just(currContext));
         });
 
@@ -82,7 +102,7 @@ public abstract class AbstractChainNode extends AbstractNode {
         List<EventListener> listeners = context.getEventListenerList();
         return Mono.defer(() -> {
                     // transmit parent response
-                    ExecuteContext parent = context.getParent();
+                    ExecuteContext parent = context.getActiveParent();
                     if (parent != null) {
                         context.setResponseFrame(parent.getResponseFrame());
                     }
@@ -91,7 +111,7 @@ public abstract class AbstractChainNode extends AbstractNode {
                     this.doInvoke(context);
 
                     return Mono.justOrEmpty(edge)
-                            .flatMap(invokeContext -> edge.getNode().execute(context.getChild()))
+                            .flatMap(invokeContext -> edge.getNode().execute(context.getActiveChild()))
                             .switchIfEmpty(Mono.just(context));
                 })
                 .doFirst(() -> {
@@ -126,55 +146,5 @@ public abstract class AbstractChainNode extends AbstractNode {
                 });
     }
 
-    private void doInvoke(ExecuteContext context) {
-        if (this.invoker == null) {
-            return;
-        }
-        InvokeContext invokeContext = (InvokeContext) context;
-        List<EventListener> listeners = invokeContext.getEventListenerList();
-
-        Flux<ResponseFrame> flux = Flux.defer(() -> {
-                    // invoke
-                    Flux<ResponseFrame> responseFrameFlux;
-                    if (context.isAsync()) {
-                        responseFrameFlux = invoker.invokeStream(invokeContext);
-                    } else {
-                        responseFrameFlux = invoker.invoke(invokeContext).flux();
-                    }
-                    return responseFrameFlux;
-                })
-                .doFirst(() -> {
-                    Event eventBefore = Event.builder()
-                            .type(Event.Invoke)
-                            .nodeId(this.getId())
-                            .nodeName(this.getName())
-                            .stream(invokeContext.isAsync())
-                            .build();
-                    AdkUtil.notifyInvokeEvent(listeners, eventBefore, false);
-                })
-                .doOnError(e -> {
-                    Event eventAfter = Event.builder()
-                            .type(Event.Invoke)
-                            .nodeId(this.getId())
-                            .nodeName(this.getName())
-                            .stream(invokeContext.isAsync())
-                            .complete(true)
-                            .error(e)
-                            .build();
-                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
-                })
-                .doOnComplete(() -> {
-                    Event eventAfter = Event.builder()
-                            .type(Event.Invoke)
-                            .nodeId(this.getId())
-                            .nodeName(this.getName())
-                            .stream(invokeContext.isAsync())
-                            .complete(true)
-                            .build();
-                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
-                });
-        flux = Flux.fromStream(flux.toStream());
-        invokeContext.setResponseFrame(flux);
-    }
 
 }

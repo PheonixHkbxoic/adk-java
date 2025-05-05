@@ -11,7 +11,7 @@ import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
  */
 public interface Edge extends Adk {
 
-    boolean match(ExecuteContext context);
+    boolean match(int index, int size, ExecuteContext context);
 
     Node getNode();
 

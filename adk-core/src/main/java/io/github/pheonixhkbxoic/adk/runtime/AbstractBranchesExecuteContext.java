@@ -12,30 +12,34 @@ import java.util.List;
 
 /**
  * @author PheonixHkbxoic
- * @date 2025/5/2 17:24
+ * @date 2025/5/4 23:14
  * @desc
  */
 @Getter
 @Setter
-public class AbstractExecuteContext implements ExecuteContext {
-    protected RootContext rootContext;
+public abstract class AbstractBranchesExecuteContext extends AbstractExecuteContext {
     protected String id;
     protected String name;
-    protected boolean build;
-    protected ExecuteContext activeParent;
-    protected ExecuteContext activeChild;
+    protected List<ExecuteContext> parentList;
+    protected List<ExecuteContext> childList;
     protected Payload payload;
     protected boolean async;
     protected Flux<ResponseFrame> responseFrameFlux;
     protected List<EventListener> eventListenerList = new ArrayList<>();
 
-    public AbstractExecuteContext(String id, String name, boolean async, Payload payload) {
-        this.id = id;
-        this.name = name;
-        this.async = async;
-        this.payload = payload;
+    public AbstractBranchesExecuteContext(String id, String name, boolean async, Payload payload) {
+        super(id, name, async, payload);
+        this.parentList = new ArrayList<>();
+        this.childList = new ArrayList<>();
     }
 
+    public void addParent(ExecuteContext parent) {
+        this.parentList.add(parent);
+    }
+
+    public void addChild(ExecuteContext child) {
+        this.childList.add(child);
+    }
 
     @Override
     public void addEventListener(EventListener... eventListenerList) {
@@ -46,31 +50,20 @@ public class AbstractExecuteContext implements ExecuteContext {
     }
 
     @Override
+    public List<EventListener> getEventListenerList() {
+        return List.of();
+    }
+
+    @Override
     public Flux<ResponseFrame> getResponseFrame() {
         return this.responseFrameFlux;
     }
+
 
     @Override
     public void setResponseFrame(Flux<ResponseFrame> responseFrameFlux) {
         this.responseFrameFlux = responseFrameFlux;
     }
 
-    @Override
-    public String toString() {
-        return this.name + "@" + this.getClass().getSimpleName();
-    }
-
-    public String toStringChain() {
-        StringBuilder sb = new StringBuilder();
-        ExecuteContext curr = this;
-        while (curr != null) {
-            sb.append(String.format("%s(%s)", curr.getName(), curr.getClass().getSimpleName()));
-            if (curr.getActiveChild() != null) {
-                sb.append(" -> ");
-            }
-            curr = curr.getActiveChild();
-        }
-        return sb.toString();
-    }
 
 }

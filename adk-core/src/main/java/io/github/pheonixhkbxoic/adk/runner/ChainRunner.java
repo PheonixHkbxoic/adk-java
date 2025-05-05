@@ -11,8 +11,8 @@ import io.github.pheonixhkbxoic.adk.core.spec.AbstractChainNode;
 import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.event.LogEventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import io.github.pheonixhkbxoic.adk.runtime.ReadonlyContext;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
+import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -60,14 +60,14 @@ public abstract class ChainRunner implements Runner {
     @Override
     public ResponseFrame run(Payload payload) {
         setDefaultEventLister();
-        ExecuteContext rootContext = new ReadonlyContext("root", false, payload);
+        ExecuteContext rootContext = new RootContext(false, payload);
         rootContext.addEventListener(eventListenerList.toArray(EventListener[]::new));
 
         return graph
                 // build
                 .build(rootContext)
                 // execute
-                .flatMap(end -> graph.execute(rootContext.getChild()))
+                .flatMap(end -> graph.execute(rootContext.getActiveChild()))
                 .flux()
                 .flatMap(ExecuteContext::getResponseFrame)
                 .doOnError(e -> {
@@ -82,7 +82,7 @@ public abstract class ChainRunner implements Runner {
     @Override
     public Flux<ResponseFrame> runAsync(Payload payload) {
         setDefaultEventLister();
-        ExecuteContext rootContext = new ReadonlyContext("root", true, payload);
+        ExecuteContext rootContext = new RootContext(true, payload);
         rootContext.addEventListener(eventListenerList.toArray(EventListener[]::new));
 
         return graph
@@ -90,7 +90,7 @@ public abstract class ChainRunner implements Runner {
                 .build(rootContext)
                 // execute
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap(end -> graph.execute(rootContext.getChild()))
+                .flatMap(end -> graph.execute(rootContext.getActiveChild()))
                 .flux()
                 .flatMap(ExecuteContext::getResponseFrame)
                 .doOnError(e -> {

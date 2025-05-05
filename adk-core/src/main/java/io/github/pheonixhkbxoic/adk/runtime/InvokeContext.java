@@ -9,12 +9,12 @@ import io.github.pheonixhkbxoic.adk.Payload;
  */
 public class InvokeContext extends AbstractExecuteContext {
 
-    public InvokeContext(String name, Payload payload) {
-        this(name, false, payload);
+    public InvokeContext(String id, String name, Payload payload) {
+        this(id, name, false, payload);
     }
 
-    public InvokeContext(String name, boolean async, Payload payload) {
-        super(name, async, payload);
+    public InvokeContext(String id, String name, boolean async, Payload payload) {
+        super(id, name, async, payload);
     }
 
 }

@@ -9,6 +9,6 @@ import io.github.pheonixhkbxoic.adk.core.edge.Edge;
  */
 public interface BranchSelector {
 
-    Edge select(ExecuteContext context);
-    
+    boolean select(Edge edge, int index, int size, AbstractBranchesExecuteContext context);
+
 }
