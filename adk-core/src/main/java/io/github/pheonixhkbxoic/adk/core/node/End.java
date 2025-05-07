@@ -14,6 +14,6 @@ public class End extends AbstractChainNode {
     }
 
     private End() {
-        super(null, NodeType.END, null, null);
+        super(null, NodeType.END, null);
     }
 }

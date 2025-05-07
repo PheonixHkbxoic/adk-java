@@ -5,5 +5,5 @@ package io.github.pheonixhkbxoic.adk.event;
  * @date 2025/5/4 00:24
  * @desc
  */
-public interface InvokeEventListener extends EventListener {
+public interface AgentInvokeEventListener extends EventListener {
 }

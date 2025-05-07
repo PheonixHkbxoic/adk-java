@@ -25,20 +25,20 @@ public class Event {
     private Throwable error;
 
 
-    public static String BUILD = "build";
     public static String Execute = "execute";
-    public static String Invoke = "invoke";
-
-    public boolean isBuild() {
-        return BUILD.equalsIgnoreCase(this.type);
-    }
+    public static String ROUTE = "route";
+    public static String AGENT_INVOKE = "agent_invoke";
 
     public boolean isExecute() {
         return Execute.equalsIgnoreCase(this.type);
     }
 
-    public boolean isInvoke() {
-        return Invoke.equalsIgnoreCase(this.type);
+    public boolean isRoute() {
+        return ROUTE.equalsIgnoreCase(this.type);
+    }
+
+    public boolean isAgent() {
+        return AGENT_INVOKE.equalsIgnoreCase(this.type);
     }
 
 }

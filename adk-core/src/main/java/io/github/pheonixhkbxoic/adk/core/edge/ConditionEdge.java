@@ -1,7 +1,7 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
+import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 
 /**
  * @author PheonixHkbxoic
@@ -9,19 +9,19 @@ import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
  * @desc
  */
 public class ConditionEdge extends PlainEdge {
-    protected TriPredicate<Integer, Integer, ExecuteContext> condition;
+    protected TriPredicate<Integer, Integer, AdkContext> condition;
 
-    public ConditionEdge(String name, TriPredicate<Integer, Integer, ExecuteContext> condition, Node node) {
+    public ConditionEdge(String name, TriPredicate<Integer, Integer, AdkContext> condition, Node node) {
         super(name, node, false);
         this.condition = condition;
     }
 
-    public static ConditionEdge of(String name, TriPredicate<Integer, Integer, ExecuteContext> condition, Node next) {
+    public static ConditionEdge of(String name, TriPredicate<Integer, Integer, AdkContext> condition, Node next) {
         return new ConditionEdge(name, condition, next);
     }
 
     @Override
-    public boolean match(int index, int size, ExecuteContext context) {
+    public boolean match(int index, int size, AdkContext context) {
         return condition.test(index, size, context);
     }
 

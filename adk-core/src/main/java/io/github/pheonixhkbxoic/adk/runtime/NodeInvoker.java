@@ -1,10 +1,9 @@
 package io.github.pheonixhkbxoic.adk.runtime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author PheonixHkbxoic
@@ -13,15 +12,18 @@ import java.util.List;
  */
 public interface NodeInvoker {
 
-    Mono<ResponseFrame> invoke(InvokeContext context);
-
-    Flux<ResponseFrame> invokeStream(InvokeContext context);
-
-    default List<ResponseFrame> readDataFromLastNode(InvokeContext context) {
-        Flux<ResponseFrame> lastAgentDataFlux = context.getResponseFrameFlux();
-        if (lastAgentDataFlux == null) {
-            return new LinkedList<>();
-        }
-        return lastAgentDataFlux.toStream().toList();
+    /**
+     * handle pre agent response before invoke or invokeStream
+     *
+     * @param context current context
+     */
+    default void beforeInvoke(ExecutableContext context) {
+        Logger log = LoggerFactory.getLogger(this.getClass());
+        Flux<ResponseFrame> lastAgentDataFlux = context.getResponse();
+        lastAgentDataFlux.subscribe(responseFrame -> log.info("before invoke response: {}", responseFrame));
     }
+
+    Mono<ResponseFrame> invoke(ExecutableContext context);
+
+    Flux<ResponseFrame> invokeStream(ExecutableContext context);
 }

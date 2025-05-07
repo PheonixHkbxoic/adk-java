@@ -2,7 +2,7 @@ package io.github.pheonixhkbxoic.adk.core.edge;
 
 import io.github.pheonixhkbxoic.adk.core.Adk;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
+import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 
 /**
  * @author PheonixHkbxoic
@@ -11,7 +11,7 @@ import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
  */
 public interface Edge extends Adk {
 
-    boolean match(int index, int size, ExecuteContext context);
+    boolean match(int index, int size, AdkContext context);
 
     Node getNode();
 

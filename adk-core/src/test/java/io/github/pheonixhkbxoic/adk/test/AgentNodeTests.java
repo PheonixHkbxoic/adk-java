@@ -1,21 +1,19 @@
 package io.github.pheonixhkbxoic.adk.test;
 
-import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.node.Agentic;
 import io.github.pheonixhkbxoic.adk.core.node.End;
-import io.github.pheonixhkbxoic.adk.event.Event;
-import io.github.pheonixhkbxoic.adk.event.EventListener;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import io.github.pheonixhkbxoic.adk.runtime.InvokeContext;
+import io.github.pheonixhkbxoic.adk.core.node.Graph;
+import io.github.pheonixhkbxoic.adk.core.node.Start;
+import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
+import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -26,67 +24,24 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  */
 @Slf4j
 public class AgentNodeTests {
+    Executor executor;
 
-    @Test
-    public void testInvoker() {
-        List<EventListener> listeners = List.of();
-        String nodeId = "agentNode-id", nodeName = "agentNode";
-        CustomAgentInvoker invoker = new CustomAgentInvoker();
-        InvokeContext invokeContext = new InvokeContext(nodeId, nodeName, Payload.builder().build());
-        Flux<ResponseFrame> flux = invoker.invokeStream(invokeContext)
-                .doOnError(e -> {
-                    Event eventAfter = Event.builder()
-                            .type(Event.Invoke)
-                            .nodeId(nodeId)
-                            .nodeName(nodeName)
-                            .stream(invokeContext.isAsync())
-                            .complete(true)
-                            .error(e)
-                            .build();
-                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
-                })
-                // TODO not work
-                .doOnComplete(() -> {
-                    Event eventAfter = Event.builder()
-                            .type(Event.Invoke)
-                            .nodeId(nodeId)
-                            .nodeName(nodeName)
-                            .stream(invokeContext.isAsync())
-                            .complete(true)
-                            .build();
-                    AdkUtil.notifyInvokeEvent(listeners, eventAfter, true);
-                });
-        flux.subscribe(responseFrame -> log.info("responseFrame: {}", responseFrame));
+    @BeforeEach
+    public void init() {
+        this.executor = new Executor(new InMemoryEventService());
     }
 
     @Test
     public void testAgentNode() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
         Agentic agentNode = Agentic.of(invoker, End.of());
-        RootContext rootCtx = new RootContext(false, Payload.builder().build());
-        ExecuteContext endCtx = agentNode.build(rootCtx).block();
-        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getActiveChild());
-        contextMono.subscribe(ec -> {
-            log.info("ec: {}", ec.getName());
-            Flux<ResponseFrame> frames = ec.getResponseFrame();
-            assertThat(frames).isNotNull();
-            frames.subscribe(frame -> log.info("frame: {}", frame.getMessage()));
-        });
+        Graph graph = new Graph("assistant", Start.of(agentNode));
+        RootContext rootCtx = new RootContext(Payload.builder().build());
+        AdkContext ec = executor.execute(graph, rootCtx);
+        Flux<ResponseFrame> frames = ec.getResponse();
+        assertThat(frames).isNotNull();
+        frames.subscribe(frame -> log.info("frame: {}", frame.getMessage()));
     }
 
-    @Test
-    public void testAgentNodeAsync() {
-        CustomAgentInvoker invoker = new CustomAgentInvoker();
-        Agentic agentNode = Agentic.of(invoker, End.of());
-        RootContext rootCtx = new RootContext(true, Payload.builder().build());
-        ExecuteContext endCtx = agentNode.build(rootCtx).block();
-        Mono<ExecuteContext> contextMono = agentNode.execute(rootCtx.getActiveChild());
-        contextMono.subscribe(ec -> {
-            log.info("ec: {}", ec.getName());
-            Flux<ResponseFrame> frames = ec.getResponseFrame();
-            assertThat(frames).isNotNull();
-            frames.subscribe(frame -> log.info("frame async: {}", frame.getMessage()));
-        });
-    }
 
 }

@@ -2,12 +2,22 @@ package io.github.pheonixhkbxoic.adk.test;
 
 import io.github.pheonixhkbxoic.adk.Agent;
 import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.core.node.Graph;
+import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
+import io.github.pheonixhkbxoic.adk.runtime.AgentInvoker;
+import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
+import io.github.pheonixhkbxoic.adk.runtime.ExecutableContext;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
-import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
+import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,9 +30,8 @@ public class RunnerTests {
 
     @Test
     public void testAgentRunner() {
-        InMemorySessionService sessionService = new InMemorySessionService();
         Agent qa = Agent.create("qaAssistant", new CustomAgentInvoker());
-        AgentRunner runner = AgentRunner.create(sessionService, "assistant", qa);
+        AgentRunner runner = AgentRunner.of("assistant", qa);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
 
@@ -33,59 +42,99 @@ public class RunnerTests {
     }
 
     @Test
-    public void testAgentRunnerAsync() {
-        InMemorySessionService sessionService = new InMemorySessionService();
+    public void testAgentRunner2() {
         Agent qa = Agent.create("qaAssistant", new CustomAgentInvoker());
-        AgentRunner runner = AgentRunner.create(sessionService, "assistant", qa);
-
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
-
-        // runAsync
-        runner.runAsync(payload)
-                .doFirst(() -> log.info("before runAsync"))
-                .doOnComplete(() -> log.info("after runAsync"))
-                .subscribe(responseFrame2 -> log.info("runAsync responseFrame: {}", responseFrame2));
-
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    public void testAgentRunnerOfAgentChain() {
-        InMemorySessionService sessionService = new InMemorySessionService();
-        Agent qa = Agent.create("qaAssistant", new CustomAgentInvoker());
-        Agent qa2 = Agent.create("qaAssistant2", new CustomAgentInvoker());
-        AgentRunner runner = AgentRunner.create(sessionService, "assistant", qa, qa2);
+        Agent qa2 = Agent.create("qaAssistant2", new CustomAgentInvoker2());
+        AgentRunner runner = AgentRunner.of("assistant", qa, qa2);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
 
         // run
         ResponseFrame responseFrame = runner.run(payload);
-        log.info("chain run responseFrame: {}", responseFrame);
+        log.info("agent run responseFrame: {}", responseFrame);
+
     }
 
     @Test
-    public void testAgentRunnerOfAgentChainAsync() {
-        InMemorySessionService sessionService = new InMemorySessionService();
+    public void testAgentRunner2Async() {
         Agent qa = Agent.create("qaAssistant", new CustomAgentInvoker());
-        Agent qa2 = Agent.create("qaAssistant2", new CustomAgentInvoker());
-        AgentRunner runner = AgentRunner.create(sessionService, "assistant", qa, qa2);
+        Agent qa2 = Agent.create("qaAssistant2", new CustomAgentInvoker2());
+        AgentRunner runner = AgentRunner.of("assistant", qa, qa2);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
-
+        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
 
         // runAsync
         runner.runAsync(payload)
-                .doFirst(() -> log.info("chain before runAsync"))
-                .doOnComplete(() -> log.info("chain after runAsync"))
-                .subscribe(responseFrame2 -> log.info("chain runAsync responseFrame: {}", responseFrame2));
+                .subscribe(responseFrame -> log.info("agent runAsync responseFrame: {}", responseFrame));
 
         try {
-            TimeUnit.SECONDS.sleep(5);
+            TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Test
+    public void testAgenticRouterRunner() {
+
+        Agent qaRouter = Agent.create("qaRouter", new AgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                // mock request llm and response
+                Map<String, Object> metadata = Map.of("activeAgent", "echoAgent", "answer", "router self answer..balabala...");
+                context.setMetadata(metadata);
+                return Mono.empty();
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                return this.invoke(context).flux();
+            }
+        });
+
+        BranchSelector branchSelector = (edge, index, size, context) -> {
+            Object activeAgent = context.getMetadata().get("activeAgent");
+            return activeAgent != null && activeAgent.toString().equalsIgnoreCase(edge.getName());
+        };
+
+        Agent qa = Agent.create("echoAgent", new CustomAgentInvoker());
+        Agent qa2 = Agent.create("mathAgent", new CustomAgentInvoker2());
+        Agent fallback = Agent.create("fallback", new AgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                String answer = (String) context.getMetadata().get("answer");
+                ResponseFrame response = new ResponseFrame();
+                response.setMessage(answer);
+                return Mono.just(response);
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                return this.invoke(context).flux();
+            }
+        });
+        AgentRouterRunner runner = AgentRouterRunner.of("assistant", qaRouter, branchSelector, fallback, qa, qa2);
+
+        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
+
+        // runAsync
+        runner.runAsync(payload)
+                .subscribe(responseFrame -> log.info("agentic router runAsync responseFrame: {}", responseFrame));
+
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        // gen uml png
+        try {
+            PlantUmlGenerator generator = runner.getPlantUmlGenerator();
+            Graph graph = runner.getGraph();
+            FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
+            generator.generatePng(graph, file);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

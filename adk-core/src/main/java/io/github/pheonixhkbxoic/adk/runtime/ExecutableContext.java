@@ -4,11 +4,11 @@ import io.github.pheonixhkbxoic.adk.core.spec.Node;
 
 /**
  * @author PheonixHkbxoic
- * @date 2025/5/7 15:06
+ * @date 2025/5/7 16:33
  * @desc
  */
-public class ReadonlyContext extends AbstractAdkContext {
-    public ReadonlyContext(AdkContext parent, Node node) {
+public class ExecutableContext extends AbstractAdkContext {
+    public ExecutableContext(AdkContext parent, Node node) {
         super(parent, node);
     }
 }

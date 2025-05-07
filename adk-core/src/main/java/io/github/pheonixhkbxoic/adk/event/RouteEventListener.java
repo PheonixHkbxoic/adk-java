@@ -5,5 +5,5 @@ package io.github.pheonixhkbxoic.adk.event;
  * @date 2025/5/3 14:10
  * @desc
  */
-public interface ExecuteEventListener extends EventListener {
+public interface RouteEventListener extends EventListener {
 }

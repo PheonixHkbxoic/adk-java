@@ -1,12 +1,16 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
 import io.github.pheonixhkbxoic.adk.AdkUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author PheonixHkbxoic
  * @date 2025/5/4 18:09
  * @desc
  */
+@Getter
+@Setter
 public abstract class AbstractEdge implements Edge {
     protected String id;
     protected String name;
@@ -20,13 +24,4 @@ public abstract class AbstractEdge implements Edge {
         }
     }
 
-    @Override
-    public String getId() {
-        return "";
-    }
-
-    @Override
-    public String getName() {
-        return "";
-    }
 }

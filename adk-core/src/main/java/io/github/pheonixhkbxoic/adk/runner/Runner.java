@@ -1,7 +1,6 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
 import io.github.pheonixhkbxoic.adk.Payload;
-import io.github.pheonixhkbxoic.adk.event.EventListener;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import reactor.core.publisher.Flux;
 
@@ -17,8 +16,6 @@ public interface Runner {
     ResponseFrame run(Payload payload);
 
     Flux<ResponseFrame> runAsync(Payload payload);
-
-    <T extends Runner> T addEventListener(EventListener... eventListeners);
 
     void setExceptionHandler(Consumer<Throwable> exceptionHandler);
 }

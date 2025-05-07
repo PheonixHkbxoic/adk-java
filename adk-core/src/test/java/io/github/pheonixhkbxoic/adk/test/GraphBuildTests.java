@@ -1,19 +1,12 @@
 package io.github.pheonixhkbxoic.adk.test;
 
-import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.edge.ConditionEdge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.node.*;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
-import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
  * @author PheonixHkbxoic
@@ -27,24 +20,20 @@ public class GraphBuildTests {
     @Test
     public void testBuildChainGraph() {
         End end = End.of();
-        Agentic agentNode = Agentic.of("assistant", end);
+        Agentic agentNode = Agentic.of("assistant", null, end);
         Start start = Start.of(agentNode);
 
-        Graph graphNode = new Graph("assistant eva", start, end);
+        Graph graph = new Graph("assistant eva", start);
+        log.info("chain graph: {}", graph);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
-        RootContext context = new RootContext(payload);
-        ExecuteContext ec = graphNode.build(context).block();
-        // ec is ReadonlyContext of end node
-        assertThat(ec).extracting(ExecuteContext::getName).matches(s -> s.equals("endNode"));
     }
 
 
     @Test
-    public void testBuildBranchGraph() {
+    public void testBranchesGraph() {
         End end = End.of();
-        Agentic agentNode01 = Agentic.of("assistant-01", end);
-        Agentic agentNode02 = Agentic.of("assistant-02", end);
+        Agentic agentNode01 = Agentic.of("assistant-01", null, end);
+        Agentic agentNode02 = Agentic.of("assistant-02", null, end);
 
         // router and edges
         ConditionEdge branch01 = ConditionEdge.of("branch-01", (index, size, ec) -> {
@@ -59,19 +48,9 @@ public class GraphBuildTests {
         Router router = new Router("testRouter", List.of(branch01, branch02, branchFallback));
 
         Start start = Start.of(router);
-        Graph graphNode = new Graph("assistant eva", start, end);
+        Graph graph = new Graph("assistant eva", start);
+        log.info("branches graph: {}", graph);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
-        RootContext context = new RootContext(payload);
-        graphNode.build(context).subscribe(ec -> {
-            Flux<ResponseFrame> frameFlux = ec.getResponseFrame();
-            log.info("ec: {}", ec);
-            if (frameFlux != null) {
-                frameFlux.subscribe(responseFrame -> {
-                    log.info("responseFrame: {}", responseFrame);
-                });
-            }
-        });
     }
 
 

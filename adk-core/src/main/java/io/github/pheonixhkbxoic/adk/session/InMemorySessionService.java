@@ -13,8 +13,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @desc
  */
 public class InMemorySessionService implements SessionService {
-    protected Map<String, AppSession> appSessionMap = new HashMap<>();
-    protected ReentrantLock lock = new ReentrantLock();
+    protected final Map<String, AppSession> appSessionMap = new HashMap<>();
+    protected final ReentrantLock lock = new ReentrantLock();
 
     @Override
     public Mono<Session> addSession(String appName, String userId, String sessionId, Session session) {

@@ -18,6 +18,6 @@ public class Start extends AbstractChainNode {
     }
 
     private Start(Edge edge) {
-        super(null, NodeType.START, null, edge);
+        super(null, NodeType.START, edge);
     }
 }

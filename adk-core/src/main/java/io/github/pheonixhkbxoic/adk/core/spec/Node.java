@@ -2,8 +2,7 @@ package io.github.pheonixhkbxoic.adk.core.spec;
 
 import io.github.pheonixhkbxoic.adk.core.Adk;
 import io.github.pheonixhkbxoic.adk.core.Status;
-import io.github.pheonixhkbxoic.adk.runtime.ExecuteContext;
-import reactor.core.publisher.Mono;
+import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 
 /**
  * @author PheonixHkbxoic
@@ -16,7 +15,5 @@ public interface Node extends Adk {
 
     Status getStatus();
 
-    Mono<ExecuteContext> build(ExecuteContext parentContext);
-
-    Mono<ExecuteContext> execute(ExecuteContext context);
+    AdkContext buildContextFromParent(AdkContext parent);
 }

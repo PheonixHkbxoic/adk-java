@@ -1,22 +1,21 @@
 package io.github.pheonixhkbxoic.adk.core.node;
 
-import io.github.pheonixhkbxoic.adk.core.spec.AbstractGraphNode;
+import io.github.pheonixhkbxoic.adk.core.NodeType;
+import io.github.pheonixhkbxoic.adk.core.spec.AbstractNode;
+import io.github.pheonixhkbxoic.adk.core.spec.Node;
+import lombok.Getter;
 
 /**
  * @author PheonixHkbxoic
- * @date 2025/5/4 22:49
+ * @date 2025/5/7 00:25
  * @desc
  */
-public class Graph extends AbstractGraphNode {
-    public Graph(Start start, End end) {
-        super(start, end);
-    }
+@Getter
+public class Graph extends AbstractNode {
+    protected Node start;
 
-    public Graph(String name, Start start, End end) {
-        super(name, start, end);
-    }
-
-    public Graph(String name, Start start, End end, AbstractGraphNode next) {
-        super(name, start, end, next);
+    public Graph(String name, Node start) {
+        super(name, NodeType.GRAPH);
+        this.start = start;
     }
 }

@@ -1,7 +1,7 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
-import io.github.pheonixhkbxoic.adk.runtime.AbstractBranchesExecuteContext;
 import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
+import io.github.pheonixhkbxoic.adk.runtime.ExecutableContext;
 
 /**
  * @author PheonixHkbxoic
@@ -10,7 +10,7 @@ import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
  */
 public class DefaultBranchSelector implements BranchSelector {
     @Override
-    public boolean select(Edge edge, int index, int size, AbstractBranchesExecuteContext context) {
+    public boolean select(Edge edge, int index, int size, ExecutableContext context) {
         return edge.match(index, size, context);
     }
 }
