@@ -16,11 +16,11 @@ import java.util.List;
  * @desc
  */
 @Getter
-public class AgenticRouter extends Router {
+public class AgentRouter extends Router {
     protected AgentInvoker agentInvoker;
 
 
-    public AgenticRouter(String name, AgentInvoker agentInvoker, List<Edge> edgeList, BranchSelector selector) {
+    public AgentRouter(String name, AgentInvoker agentInvoker, List<Edge> edgeList, BranchSelector selector) {
         super(name, NodeType.AGENT_ROUTER, edgeList, selector);
         this.agentInvoker = agentInvoker;
     }

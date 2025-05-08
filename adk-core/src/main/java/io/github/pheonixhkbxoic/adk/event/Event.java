@@ -27,7 +27,7 @@ public class Event {
 
     public static String Execute = "execute";
     public static String ROUTE = "route";
-    public static String AGENT_INVOKE = "agent_invoke";
+    public static String INVOKE = "invoke";
 
     public boolean isExecute() {
         return Execute.equalsIgnoreCase(this.type);
@@ -37,8 +37,8 @@ public class Event {
         return ROUTE.equalsIgnoreCase(this.type);
     }
 
-    public boolean isAgent() {
-        return AGENT_INVOKE.equalsIgnoreCase(this.type);
+    public boolean isInvoke() {
+        return INVOKE.equalsIgnoreCase(this.type);
     }
 
 }

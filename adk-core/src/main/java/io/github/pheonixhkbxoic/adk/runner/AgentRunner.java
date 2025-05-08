@@ -1,13 +1,11 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
 import io.github.pheonixhkbxoic.adk.AgentProvider;
-import io.github.pheonixhkbxoic.adk.core.node.Agentic;
+import io.github.pheonixhkbxoic.adk.core.node.Agent;
 import io.github.pheonixhkbxoic.adk.core.node.End;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.core.node.Start;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
-import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +23,7 @@ public class AgentRunner extends AbstractRunner {
     }
 
     protected AgentRunner(String appName, List<AgentProvider> agentProviders) {
-        super(new InMemorySessionService(), new InMemoryEventService(), appName);
+        super(appName);
         this.agentProviders = agentProviders;
     }
 
@@ -35,7 +33,7 @@ public class AgentRunner extends AbstractRunner {
         Node chain = End.of();
         for (int i = agentProviders.size() - 1; i >= 0; i--) {
             AgentProvider agentProvider = agentProviders.get(i);
-            chain = Agentic.of(agentProvider.getName(), agentProvider.getAgentInvoker(), chain);
+            chain = Agent.of(agentProvider.getName(), agentProvider.getAgentInvoker(), chain);
         }
         Start start = Start.of(chain);
         return new Graph(appName, start);

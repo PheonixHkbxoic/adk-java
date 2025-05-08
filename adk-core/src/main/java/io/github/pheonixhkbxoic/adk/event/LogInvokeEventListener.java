@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LogInvokeEventListener implements RouteEventListener, AgentInvokeEventListener {
     @Override
     public void before(Event event) {
-        if (event.isAgent()) {
+        if (event.isInvoke()) {
             log.info("before event: {}, {}", event.getType(), event.getNodeName());
         } else {
             log.debug("before event: {}, {}", event.getType(), event.getNodeName());
@@ -20,7 +20,7 @@ public class LogInvokeEventListener implements RouteEventListener, AgentInvokeEv
 
     @Override
     public void after(Event event) {
-        if (event.isAgent()) {
+        if (event.isInvoke()) {
             log.info("after event: {}, {}", event.getType(), event.getNodeName(), event.getError());
         } else {
             log.debug("after event: {}, {}", event.getType(), event.getNodeName(), event.getError());

@@ -3,14 +3,14 @@ package io.github.pheonixhkbxoic.adk.test;
 import io.github.pheonixhkbxoic.adk.AgentProvider;
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
+import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
-import io.github.pheonixhkbxoic.adk.runtime.AgentInvoker;
-import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
-import io.github.pheonixhkbxoic.adk.runtime.ExecutableContext;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
+import io.github.pheonixhkbxoic.adk.runtime.*;
+import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,10 +28,17 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RunnerTests {
 
+    private static Executor executor;
+
+    @BeforeAll
+    public static void init() {
+        executor = new Executor(new InMemorySessionService(), new InMemoryEventService());
+    }
+
     @Test
     public void testAgentRunner() {
         AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
-        AgentRunner runner = AgentRunner.of("assistant", qa);
+        AgentRunner runner = AgentRunner.of("Assistant", qa).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
 
@@ -42,10 +49,10 @@ public class RunnerTests {
     }
 
     @Test
-    public void testAgentRunner2() {
+    public void testAgentChainRunner() {
         AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
         AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
-        AgentRunner runner = AgentRunner.of("assistant", qa, qa2);
+        AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
 
@@ -53,13 +60,23 @@ public class RunnerTests {
         ResponseFrame responseFrame = runner.run(payload);
         log.info("agent run responseFrame: {}", responseFrame);
 
+        // gen uml png
+        try {
+            PlantUmlGenerator generator = runner.getPlantUmlGenerator();
+            Graph graph = runner.getGraph();
+            FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
+            generator.generatePng(graph, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Test
-    public void testAgentRunner2Async() {
+    public void testAgentChainRunnerAsync() {
         AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
         AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
-        AgentRunner runner = AgentRunner.of("assistant", qa, qa2);
+        AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
 
@@ -114,12 +131,16 @@ public class RunnerTests {
                 return this.invoke(context).flux();
             }
         });
-        AgentRouterRunner runner = AgentRouterRunner.of("assistant", qaRouter, branchSelector, fallback, qa, qa2);
+        AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchSelector, fallback, qa, qa2)
+                .initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
 
         // runAsync
         runner.runAsync(payload)
+                .doFirst(() -> log.info("before runAsync"))
+                .doOnError(e -> log.error("error runAsync: {}", e.getMessage(), e))
+                .doOnComplete(() -> log.info("after runAsync"))
                 .subscribe(responseFrame -> log.info("agentic router runAsync responseFrame: {}", responseFrame));
 
         try {

@@ -16,18 +16,18 @@ import lombok.Getter;
  * @desc
  */
 @Getter
-public class Agentic extends AbstractChainNode {
+public class Agent extends AbstractChainNode {
     protected AgentInvoker agentInvoker;
 
-    public static Agentic of(AgentInvoker invoker, Node next) {
+    public static Agent of(AgentInvoker invoker, Node next) {
         return of(null, invoker, next);
     }
 
-    public static Agentic of(String name, AgentInvoker agentInvoker, Node next) {
-        return new Agentic(name, agentInvoker, PlainEdge.of(next));
+    public static Agent of(String name, AgentInvoker agentInvoker, Node next) {
+        return new Agent(name, agentInvoker, PlainEdge.of(next));
     }
 
-    private Agentic(String name, AgentInvoker agentInvoker, Edge edge) {
+    private Agent(String name, AgentInvoker agentInvoker, Edge edge) {
         super(name, NodeType.AGENT, edge);
         this.agentInvoker = agentInvoker;
     }

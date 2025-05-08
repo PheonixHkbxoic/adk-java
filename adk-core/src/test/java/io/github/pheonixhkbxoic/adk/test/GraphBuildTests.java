@@ -20,7 +20,7 @@ public class GraphBuildTests {
     @Test
     public void testBuildChainGraph() {
         End end = End.of();
-        Agentic agentNode = Agentic.of("assistant", null, end);
+        Agent agentNode = Agent.of("assistant", null, end);
         Start start = Start.of(agentNode);
 
         Graph graph = new Graph("assistant eva", start);
@@ -32,8 +32,8 @@ public class GraphBuildTests {
     @Test
     public void testBranchesGraph() {
         End end = End.of();
-        Agentic agentNode01 = Agentic.of("assistant-01", null, end);
-        Agentic agentNode02 = Agentic.of("assistant-02", null, end);
+        Agent agentNode01 = Agent.of("assistant-01", null, end);
+        Agent agentNode02 = Agent.of("assistant-02", null, end);
 
         // router and edges
         ConditionEdge branch01 = ConditionEdge.of("branch-01", (index, size, ec) -> {

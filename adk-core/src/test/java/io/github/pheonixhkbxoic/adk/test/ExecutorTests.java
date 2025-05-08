@@ -8,6 +8,7 @@ import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
+import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,13 +23,11 @@ import java.util.List;
 @Slf4j
 public class ExecutorTests {
 
-    InMemoryEventService es;
-    Executor executor;
+    private Executor executor;
 
     @BeforeEach
     public void init() {
-        es = new InMemoryEventService();
-        executor = new Executor(es);
+        this.executor = new Executor(new InMemorySessionService(), new InMemoryEventService());
     }
 
     @Test
@@ -36,8 +35,8 @@ public class ExecutorTests {
         CustomAgentInvoker invoker01 = new CustomAgentInvoker();
         CustomAgentInvoker2 invoker02 = new CustomAgentInvoker2();
         End end = End.of();
-        Agentic agentNode01 = Agentic.of("assistant-01", invoker01, end);
-        Agentic agentNode02 = Agentic.of("assistant-02", invoker02, end);
+        Agent agentNode01 = Agent.of("assistant-01", invoker01, end);
+        Agent agentNode02 = Agent.of("assistant-02", invoker02, end);
 
         // router and edges
         ConditionEdge branch01 = ConditionEdge.of("branch-01", (index, size, ec) -> {

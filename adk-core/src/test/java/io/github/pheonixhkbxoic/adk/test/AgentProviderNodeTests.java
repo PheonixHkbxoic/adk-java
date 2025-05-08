@@ -1,7 +1,7 @@
 package io.github.pheonixhkbxoic.adk.test;
 
 import io.github.pheonixhkbxoic.adk.Payload;
-import io.github.pheonixhkbxoic.adk.core.node.Agentic;
+import io.github.pheonixhkbxoic.adk.core.node.Agent;
 import io.github.pheonixhkbxoic.adk.core.node.End;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.core.node.Start;
@@ -10,6 +10,7 @@ import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
+import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +29,13 @@ public class AgentProviderNodeTests {
 
     @BeforeEach
     public void init() {
-        this.executor = new Executor(new InMemoryEventService());
+        this.executor = new Executor(new InMemorySessionService(), new InMemoryEventService());
     }
 
     @Test
     public void testAgentNode() {
         CustomAgentInvoker invoker = new CustomAgentInvoker();
-        Agentic agentNode = Agentic.of(invoker, End.of());
+        Agent agentNode = Agent.of(invoker, End.of());
         Graph graph = new Graph("assistant", Start.of(agentNode));
         RootContext rootCtx = new RootContext(Payload.builder().build());
         AdkContext ec = executor.execute(graph, rootCtx);

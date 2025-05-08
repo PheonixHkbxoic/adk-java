@@ -2,12 +2,12 @@ package io.github.pheonixhkbxoic.adk.runner;
 
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
-import io.github.pheonixhkbxoic.adk.event.EventService;
+import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
-import io.github.pheonixhkbxoic.adk.session.SessionService;
+import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 @Slf4j
 public abstract class AbstractRunner implements Runner {
     protected final String appName;
-    protected SessionService sessionService;
     protected Executor executor;
     protected Graph graph;
     protected Consumer<Throwable> exceptionHandler;
@@ -37,23 +36,33 @@ public abstract class AbstractRunner implements Runner {
     public static Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> log.info("exception: {}", e.getMessage(), e);
 
 
-    protected AbstractRunner(SessionService sessionService,
-                             EventService eventService,
-                             String appName) {
-        this.sessionService = sessionService;
-        this.executor = new Executor(eventService);
+    protected AbstractRunner(String appName) {
         this.appName = appName;
         this.plantUmlGenerator = new PlantUmlGenerator();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends AbstractRunner> T initExecutor(Executor executor) {
+        this.executor = executor;
+        return (T) this;
+    }
+
+
     protected abstract Graph buildGraph();
+
+    private void initDefault() {
+        if (this.executor == null) {
+            this.executor = new Executor(new InMemorySessionService(), new InMemoryEventService());
+        }
+        if (this.graph == null) {
+            this.graph = this.buildGraph();
+        }
+    }
 
     @Override
     public ResponseFrame run(Payload payload) {
         RootContext rootContext = new RootContext(payload);
-        if (this.graph == null) {
-            this.graph = this.buildGraph();
-        }
+        this.initDefault();
 
         AdkContext ec = executor.execute(graph, rootContext);
         return ec.getResponse().blockFirst();
@@ -62,9 +71,7 @@ public abstract class AbstractRunner implements Runner {
     @Override
     public Flux<ResponseFrame> runAsync(Payload payload) {
         RootContext rootContext = new RootContext(payload);
-        if (this.graph == null) {
-            this.graph = this.buildGraph();
-        }
+        this.initDefault();
 
         AdkContext ec = executor.execute(graph, rootContext);
         return ec.getResponse()

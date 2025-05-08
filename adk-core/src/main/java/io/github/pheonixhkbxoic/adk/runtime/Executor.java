@@ -10,6 +10,8 @@ import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventService;
 import io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener;
 import io.github.pheonixhkbxoic.adk.exception.PlainEdgeFallbackCountCheckException;
+import io.github.pheonixhkbxoic.adk.session.SessionService;
+import lombok.Getter;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -21,10 +23,13 @@ import java.util.concurrent.*;
  * @desc
  */
 public class Executor {
+    @Getter
+    private final SessionService sessionService;
     private final EventService eventService;
-    private ExecutorService es;
+    private transient ExecutorService es;
 
-    public Executor(EventService eventService) {
+    public Executor(SessionService sessionService, EventService eventService) {
+        this.sessionService = sessionService;
         this.eventService = eventService;
         this.eventService.addEventListener(new LogInvokeEventListener());
     }
@@ -87,8 +92,8 @@ public class Executor {
         AdkContext nextContext = null;
         Node curr = currContext.getNode();
         if (curr instanceof AbstractBranchesNode) {
-            if (curr instanceof AgenticRouter) {
-                nextContext = this.doExecuteAgenticRouterNode(currContext, ((AgenticRouter) curr));
+            if (curr instanceof AgentRouter) {
+                nextContext = this.doExecuteAgenticRouterNode(currContext, ((AgentRouter) curr));
             } else if (curr instanceof Router) {
                 nextContext = this.doExecuteRouterNode(currContext, ((Router) curr));
             } else if (curr instanceof Scatter) {
@@ -110,13 +115,13 @@ public class Executor {
         return nextContext;
     }
 
-    private AdkContext doExecuteAgenticRouterNode(AdkContext currContext, AgenticRouter curr) {
+    private AdkContext doExecuteAgenticRouterNode(AdkContext currContext, AgentRouter curr) {
 
         ExecutableContext agentContext = (ExecutableContext) currContext;
         Node agent = agentContext.getNode();
         // invoke agentic
         Event eventAgentBefore = Event.builder()
-                .type(Event.AGENT_INVOKE)
+                .type(Event.INVOKE)
                 .nodeId(agent.getId())
                 .nodeName(agent.getName())
                 .stream(agentContext.getPayload().isStream())
@@ -136,7 +141,7 @@ public class Executor {
             agentContext.setResponse(data);
 
             Event eventAfter = Event.builder()
-                    .type(Event.AGENT_INVOKE)
+                    .type(Event.INVOKE)
                     .nodeId(agent.getId())
                     .nodeName(agent.getName())
                     .stream(agentContext.getPayload().isStream())
@@ -145,7 +150,7 @@ public class Executor {
             eventService.send(eventAfter);
         } catch (Throwable e) {
             Event eventAfter = Event.builder()
-                    .type(Event.AGENT_INVOKE)
+                    .type(Event.INVOKE)
                     .nodeId(agent.getId())
                     .nodeName(agent.getName())
                     .stream(agentContext.getPayload().isStream())
@@ -308,10 +313,10 @@ public class Executor {
 
     private AdkContext doExecuteChainNode(AdkContext currContext, AbstractChainNode curr) {
         AdkContext nextContext = null;
-        if (curr instanceof Agentic) {
+        if (curr instanceof Agent) {
             AgentContext agentContext = (AgentContext) currContext;
             Event eventBefore = Event.builder()
-                    .type(Event.AGENT_INVOKE)
+                    .type(Event.INVOKE)
                     .nodeId(curr.getId())
                     .nodeName(curr.getName())
                     .stream(agentContext.getPayload().isStream())
@@ -320,7 +325,7 @@ public class Executor {
 
 
             try {
-                AgentInvoker agentInvoker = ((Agentic) curr).getAgentInvoker();
+                AgentInvoker agentInvoker = ((Agent) curr).getAgentInvoker();
                 agentInvoker.beforeInvoke(agentContext);
                 Flux<ResponseFrame> data;
                 if (agentContext.getPayload().isStream()) {
@@ -331,7 +336,7 @@ public class Executor {
                 agentContext.setResponse(data);
 
                 Event eventAfter = Event.builder()
-                        .type(Event.AGENT_INVOKE)
+                        .type(Event.INVOKE)
                         .nodeId(curr.getId())
                         .nodeName(curr.getName())
                         .stream(currContext.getPayload().isStream())
@@ -340,7 +345,7 @@ public class Executor {
                 eventService.send(eventAfter);
             } catch (Throwable e) {
                 Event eventAfter = Event.builder()
-                        .type(Event.AGENT_INVOKE)
+                        .type(Event.INVOKE)
                         .nodeId(curr.getId())
                         .nodeName(curr.getName())
                         .stream(currContext.getPayload().isStream())
