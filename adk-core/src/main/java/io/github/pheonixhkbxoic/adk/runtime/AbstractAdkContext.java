@@ -46,12 +46,11 @@ public class AbstractAdkContext implements AdkContext {
     @Override
     public String toString() {
         return """
-                {"id": "%s", "name": "%s", "node": {"type": "%s", "status": {"state": "%s"}}, "metadata": {}, "activeParentId": "%s", "activeChildId": "%s"}
+                {"id": "%s", "name": "%s", "node": %s, "metadata": {}, "activeParentId": "%s", "activeChildId": "%s"}
                 """.formatted(
                 id,
                 name,
-                node == null ? "" : node.getType(),
-                node == null ? "" : node.getStatus().getState().getName(),
+                node == null ? null : node.toString(),
                 activeParent == null ? "" : activeParent.getId(),
                 activeChild == null ? "" : activeChild.getId());
     }

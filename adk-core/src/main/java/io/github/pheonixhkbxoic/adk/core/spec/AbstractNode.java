@@ -52,6 +52,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public String toString() {
-        return this.name;
+        return """
+                {"type": "%s", "status": {"state": "%s"}}""".formatted(type, status.getState().getName());
     }
 }

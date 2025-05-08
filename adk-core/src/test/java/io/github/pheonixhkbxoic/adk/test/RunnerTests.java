@@ -1,5 +1,6 @@
 package io.github.pheonixhkbxoic.adk.test;
 
+import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.AgentProvider;
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
@@ -8,6 +9,7 @@ import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
 import io.github.pheonixhkbxoic.adk.runtime.*;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
+import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -131,10 +134,17 @@ public class RunnerTests {
                 return this.invoke(context).flux();
             }
         });
-        AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchSelector, fallback, qa, qa2)
+        String appName = "AgentRouter";
+        AgentRouterRunner runner = AgentRouterRunner.of(appName, qaRouter, branchSelector, fallback, qa, qa2)
                 .initExecutor(executor);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
+        Payload payload = Payload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .message("hello")
+                .stream(true)
+                .build();
 
         // runAsync
         runner.runAsync(payload)
@@ -148,6 +158,10 @@ public class RunnerTests {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        Session session = executor.getSessionService().getSession(appName, payload.getUserId(), payload.getSessionId());
+        LinkedList<AdkContext> taskContextChain = session.getTaskContextChain(payload.getTaskId());
+        log.info("taskContextChain: {}", taskContextChain);
 
         // gen uml png
         try {
