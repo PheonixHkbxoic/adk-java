@@ -1,6 +1,6 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.Agent;
+import io.github.pheonixhkbxoic.adk.AgentProvider;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.node.*;
@@ -18,21 +18,21 @@ import java.util.List;
  * @desc
  */
 public class AgentRouterRunner extends AbstractRunner {
-    private final Agent agentRouter;
+    private final AgentProvider agentProviderRouter;
     private final BranchSelector branchSelector;
-    private final Agent agentFallback;
-    private final List<Agent> agents;
+    private final AgentProvider agentProviderFallback;
+    private final List<AgentProvider> agentProviders;
 
-    public static AgentRouterRunner of(String appName, Agent agentRouter, BranchSelector selector, Agent agentFallback, Agent... agents) {
-        return new AgentRouterRunner(appName, agentRouter, selector, agentFallback, Arrays.asList(agents));
+    public static AgentRouterRunner of(String appName, AgentProvider agentProviderRouter, BranchSelector selector, AgentProvider agentProviderFallback, AgentProvider... agentProviders) {
+        return new AgentRouterRunner(appName, agentProviderRouter, selector, agentProviderFallback, Arrays.asList(agentProviders));
     }
 
-    protected AgentRouterRunner(String appName, Agent agentRouter, BranchSelector selector, Agent agentFallback, List<Agent> agents) {
+    protected AgentRouterRunner(String appName, AgentProvider agentProviderRouter, BranchSelector selector, AgentProvider agentProviderFallback, List<AgentProvider> agentProviders) {
         super(new InMemorySessionService(), new InMemoryEventService(), appName);
-        this.agentRouter = agentRouter;
+        this.agentProviderRouter = agentProviderRouter;
         this.branchSelector = selector;
-        this.agentFallback = agentFallback;
-        this.agents = agents;
+        this.agentProviderFallback = agentProviderFallback;
+        this.agentProviders = agentProviders;
     }
 
 
@@ -42,17 +42,17 @@ public class AgentRouterRunner extends AbstractRunner {
         End end = End.of();
 
         // router and edges
-        List<Edge> edgeList = agents.stream()
-                .map(agent -> {
-                    Agentic agentic = Agentic.of(agent.getName(), agent.getAgentInvoker(), end);
-                    PlainEdge edge = PlainEdge.of(agent.getName(), agentic);
+        List<Edge> edgeList = agentProviders.stream()
+                .map(agentProvider -> {
+                    Agentic agentic = Agentic.of(agentProvider.getName(), agentProvider.getAgentInvoker(), end);
+                    PlainEdge edge = PlainEdge.of(agentProvider.getName(), agentic);
                     return (Edge) edge;
                 })
                 .toList();
-        Agentic agenticFallback = Agentic.of(agentFallback.getName(), agentFallback.getAgentInvoker(), end);
+        Agentic agenticFallback = Agentic.of(agentProviderFallback.getName(), agentProviderFallback.getAgentInvoker(), end);
         ArrayList<Edge> edges = new ArrayList<>(edgeList);
         edges.add(PlainEdge.of(agenticFallback.getName(), agenticFallback, true));
-        AgenticRouter agenticRouter = new AgenticRouter(agentRouter.getName(), agentRouter.getAgentInvoker(), edges, branchSelector);
+        AgenticRouter agenticRouter = new AgenticRouter(agentProviderRouter.getName(), agentProviderRouter.getAgentInvoker(), edges, branchSelector);
 
         Start start = Start.of(agenticRouter);
         return new Graph(appName, start);

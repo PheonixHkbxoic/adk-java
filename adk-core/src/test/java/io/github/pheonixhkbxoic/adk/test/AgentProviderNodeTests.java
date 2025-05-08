@@ -23,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * @desc
  */
 @Slf4j
-public class AgentNodeTests {
+public class AgentProviderNodeTests {
     Executor executor;
 
     @BeforeEach
