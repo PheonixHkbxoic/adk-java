@@ -13,6 +13,7 @@ import lombok.Data;
 public class Payload {
     private String userId;
     private String sessionId;
+    private String taskId;
     private String message;
     private boolean stream;
 }

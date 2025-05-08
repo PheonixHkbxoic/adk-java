@@ -2,6 +2,7 @@ package io.github.pheonixhkbxoic.adk.runtime;
 
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.Adk;
+import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import reactor.core.publisher.Flux;
 
@@ -35,4 +36,5 @@ public interface AdkContext extends Adk {
 
     void setMetadata(Map<String, Object> metadata);
 
+    void updateStatus(State state);
 }

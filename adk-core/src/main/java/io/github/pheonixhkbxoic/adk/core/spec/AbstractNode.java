@@ -41,6 +41,11 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    @Override
     public AdkContext buildContextFromParent(AdkContext parent) {
         return new ReadonlyContext(parent, this);
     }

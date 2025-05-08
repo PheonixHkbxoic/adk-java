@@ -1,6 +1,8 @@
 package io.github.pheonixhkbxoic.adk.runtime;
 
 import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.core.State;
+import io.github.pheonixhkbxoic.adk.core.Status;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,7 +45,19 @@ public class AbstractAdkContext implements AdkContext {
 
     @Override
     public String toString() {
-        return this.name + "@" + this.getClass().getSimpleName();
+        return """
+                {"id": "%s", "name": "%s", "node": {"type": "%s", "status": {"state": "%s"}}, "metadata": {}, "activeParentId": "%s", "activeChildId": "%s"}
+                """.formatted(
+                id,
+                name,
+                node == null ? "" : node.getType(),
+                node == null ? "" : node.getStatus().getState().getName(),
+                activeParent == null ? "" : activeParent.getId(),
+                activeChild == null ? "" : activeChild.getId());
     }
 
+    @Override
+    public void updateStatus(State state) {
+        this.node.updateStatus(Status.builder().state(state).build());
+    }
 }

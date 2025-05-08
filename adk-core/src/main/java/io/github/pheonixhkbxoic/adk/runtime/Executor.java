@@ -1,5 +1,7 @@
 package io.github.pheonixhkbxoic.adk.runtime;
 
+import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.node.*;
@@ -9,7 +11,9 @@ import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventService;
 import io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener;
+import io.github.pheonixhkbxoic.adk.exception.AdkException;
 import io.github.pheonixhkbxoic.adk.exception.PlainEdgeFallbackCountCheckException;
+import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.session.SessionService;
 import lombok.Getter;
 import reactor.core.publisher.Flux;
@@ -35,12 +39,26 @@ public class Executor {
     }
 
     public AdkContext execute(Graph graph, RootContext rootContext) {
+        String appName = graph.getName();
+        Payload payload = rootContext.getPayload();
+        String userId = payload.getUserId();
+        String sessionId = payload.getSessionId();
+        Session session;
+        try {
+            session = this.sessionService.addSession(appName, userId, sessionId, new Session(sessionId));
+        } catch (Throwable e) {
+            throw new AdkException("operate session exception", e);
+        }
+
+        String taskId = payload.getTaskId();
+        session.updateSession(taskId, rootContext);
+
         Node curr = graph.getStart();
         AdkContext currContext = curr.buildContextFromParent(rootContext);
-        return this.execute(currContext, null);
+        return this.execute(appName, session, currContext, null);
     }
 
-    private AdkContext execute(AdkContext currContext, CountDownLatch latchParallel) {
+    private AdkContext execute(String appName, Session session, AdkContext currContext, CountDownLatch latchParallel) {
         AdkContext last = currContext;
         AdkContext curr = currContext;
         while (curr != null) {
@@ -58,7 +76,10 @@ public class Executor {
 
             try {
                 // execute and go next context
-                AdkContext context = this.doExecute(curr, latchParallel);
+                session.updateSession(curr.getPayload().getTaskId(), curr);
+                curr.updateStatus(State.of(State.EXECUTING));
+                AdkContext context = this.doExecute(appName, curr, latchParallel);
+                curr.updateStatus(State.of(State.SUCCESS));
                 if (context != null) {
                     last = context;
                 }
@@ -73,6 +94,7 @@ public class Executor {
                         .build();
                 eventService.send(eventAfter);
             } catch (Throwable e) {
+                curr.updateStatus(State.of(State.FAILURE));
                 Event eventAfter = Event.builder()
                         .type(Event.Execute)
                         .nodeId(eventCurr.getId())
@@ -88,7 +110,7 @@ public class Executor {
         return last;
     }
 
-    private AdkContext doExecute(AdkContext currContext, CountDownLatch latchParallel) {
+    private AdkContext doExecute(String appName, AdkContext currContext, CountDownLatch latchParallel) {
         AdkContext nextContext = null;
         Node curr = currContext.getNode();
         if (curr instanceof AbstractBranchesNode) {
@@ -97,7 +119,7 @@ public class Executor {
             } else if (curr instanceof Router) {
                 nextContext = this.doExecuteRouterNode(currContext, ((Router) curr));
             } else if (curr instanceof Scatter) {
-                nextContext = this.doExecuteScatterNode(currContext, ((Scatter) curr));
+                nextContext = this.doExecuteScatterNode(appName, currContext, ((Scatter) curr));
             }
         } else if (curr instanceof Aggregator) {
             if (latchParallel != null) {
@@ -127,6 +149,7 @@ public class Executor {
                 .stream(agentContext.getPayload().isStream())
                 .build();
         eventService.send(eventAgentBefore);
+        currContext.updateStatus(State.of(State.INVOKING));
 
 
         try {
@@ -170,6 +193,7 @@ public class Executor {
                 .stream(currContext.getPayload().isStream())
                 .build();
         eventService.send(eventBefore);
+        currContext.updateStatus(State.of(State.ROUTING));
 
 
         try {
@@ -224,6 +248,7 @@ public class Executor {
                 .stream(currContext.getPayload().isStream())
                 .build();
         eventService.send(eventBefore);
+        currContext.updateStatus(State.of(State.ROUTING));
 
 
         try {
@@ -270,19 +295,22 @@ public class Executor {
         }
     }
 
-    private AdkContext doExecuteScatterNode(AdkContext currContext, Scatter curr) {
+    private AdkContext doExecuteScatterNode(String appName, AdkContext currContext, Scatter curr) {
         List<Edge> edgeList = curr.getEdgeList();
         int parallelCount = curr.getEdgeList().size();
         if (es == null) {
             es = Executors.newCachedThreadPool();
         }
         try {
+            Payload payload = currContext.getPayload();
+            Session session = this.sessionService.getSession(appName, payload.getUserId(), payload.getSessionId());
+
             CountDownLatch latch = new CountDownLatch(parallelCount);
             List<Future<AdkContext>> parallelFutureList = edgeList.stream()
                     .map(edge -> {
                         final Node currParallel = edge.getNode();
                         AdkContext currContextParallel = currParallel.buildContextFromParent(currContext);
-                        return es.submit(() -> this.execute(currContextParallel, latch));
+                        return es.submit(() -> this.execute(appName, session, currContextParallel, latch));
                     })
                     .toList();
             // await all thread arrive Aggregator
@@ -322,7 +350,7 @@ public class Executor {
                     .stream(agentContext.getPayload().isStream())
                     .build();
             eventService.send(eventBefore);
-
+            currContext.updateStatus(State.of(State.INVOKING));
 
             try {
                 AgentInvoker agentInvoker = ((Agent) curr).getAgentInvoker();

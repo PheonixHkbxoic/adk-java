@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class State {
     public static String READY = "ready";
-    public static String RUNNING = "running";
+    public static String EXECUTING = "executing";
+    public static String ROUTING = "routing";
+    public static String INVOKING = "invoking";
     public static String SUCCESS = "success";
     public static String FAILURE = "failure";
 
@@ -26,5 +28,21 @@ public class State {
 
     public boolean eq(String stateName) {
         return this.name.equals(stateName);
+    }
+
+    public boolean isReady() {
+        return this.eq(READY);
+    }
+
+    public boolean isRunning() {
+        return !isReady() && !isSuccess() && isFailure();
+    }
+
+    public boolean isSuccess() {
+        return this.eq(SUCCESS);
+    }
+
+    public boolean isFailure() {
+        return this.eq(FAILURE);
     }
 }

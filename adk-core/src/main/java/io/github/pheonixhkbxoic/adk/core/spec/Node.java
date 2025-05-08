@@ -15,5 +15,7 @@ public interface Node extends Adk {
 
     Status getStatus();
 
+    void updateStatus(Status status);
+    
     AdkContext buildContextFromParent(AdkContext parent);
 }

@@ -20,6 +20,9 @@ public class RootContext extends ReadonlyContext {
         this.id = id;
         this.name = name;
         this.payload = payload;
+        if (AdkUtil.isEmpty(payload.getTaskId())) {
+            payload.setTaskId(AdkUtil.uuid4hex());
+        }
         this.response = Flux.empty();
     }
 

@@ -1,7 +1,6 @@
 package io.github.pheonixhkbxoic.adk.session;
 
 import lombok.Getter;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,48 +16,48 @@ public class InMemorySessionService implements SessionService {
     protected final ReentrantLock lock = new ReentrantLock();
 
     @Override
-    public Mono<Session> addSession(String appName, String userId, String sessionId, Session session) {
-        return this.getSession(appName, userId, sessionId)
-                .switchIfEmpty(Mono.fromSupplier(() -> {
-                    lock.lock();
-                    try {
-                        appSessionMap.computeIfAbsent(appName, k -> new AppSession(k, new HashMap<>()));
-                        AppSession appSession = appSessionMap.get(appName);
+    public Session addSession(String appName, String userId, String sessionId, Session session) {
+        lock.lock();
+        try {
+            Session exist = this.getSession(appName, userId, sessionId);
+            if (exist != null) {
+                return exist;
+            }
+            appSessionMap.computeIfAbsent(appName, k -> new AppSession(k, new HashMap<>()));
+            AppSession appSession = appSessionMap.get(appName);
 
-                        Map<String, UserSession> userSessionMap = appSession.getUserSessionMap();
-                        userSessionMap.computeIfAbsent(userId, k -> new UserSession(k, new HashMap<>()));
-                        UserSession userSession = userSessionMap.get(userId);
+            Map<String, UserSession> userSessionMap = appSession.getUserSessionMap();
+            userSessionMap.computeIfAbsent(userId, k -> new UserSession(k, new HashMap<>()));
+            UserSession userSession = userSessionMap.get(userId);
 
-                        userSession.getSessionMap().computeIfAbsent(sessionId, k -> session);
-                        return session;
-                    } finally {
-                        lock.unlock();
-                    }
-                }));
+            userSession.getSessionMap().computeIfAbsent(sessionId, k -> session);
+            return session;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
-    public Mono<Session> getSession(String appName, String userId, String sessionId) {
+    public Session getSession(String appName, String userId, String sessionId) {
         lock.lock();
         try {
             AppSession appSession = appSessionMap.get(appName);
             if (appSession == null) {
-                return Mono.empty();
+                return null;
             }
             Map<String, UserSession> userSessionMap = appSession.getUserSessionMap();
             if (userSessionMap == null) {
-                return Mono.empty();
+                return null;
             }
             UserSession userSession = userSessionMap.get(userId);
             if (userSession == null) {
-                return Mono.empty();
+                return null;
             }
             Map<String, Session> sessionMap = userSession.getSessionMap();
             if (sessionMap == null) {
-                return Mono.empty();
+                return null;
             }
-            Session session = sessionMap.get(sessionId);
-            return Mono.justOrEmpty(session);
+            return sessionMap.get(sessionId);
         } finally {
             lock.unlock();
         }

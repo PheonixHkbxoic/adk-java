@@ -9,10 +9,12 @@ import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
+import io.github.pheonixhkbxoic.adk.session.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -51,12 +53,16 @@ public class ExecutorTests {
         Router router = new Router("testRouter", List.of(branch01, branch02, branchFallback));
 
         Start start = Start.of(router);
-        Graph graph = new Graph("assistant eva", start);
+        String appName = "AgentRouter";
+        Graph graph = new Graph(appName, start);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
         RootContext rootContext = new RootContext(payload);
         AdkContext ec = executor.execute(graph, rootContext);
         log.info("context: {}", ec);
+        Session session = executor.getSessionService().getSession(appName, payload.getUserId(), payload.getSessionId());
+        LinkedList<AdkContext> taskContextChain = session.getTaskContextChain(rootContext.getPayload().getTaskId());
+        log.info("taskContextChain: {}", taskContextChain);
     }
 
 
