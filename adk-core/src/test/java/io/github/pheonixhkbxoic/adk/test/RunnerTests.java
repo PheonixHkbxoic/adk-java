@@ -3,6 +3,7 @@ package io.github.pheonixhkbxoic.adk.test;
 import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.core.edge.DefaultRouterSelector;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
@@ -98,11 +99,12 @@ public class RunnerTests {
     @Test
     public void testAgenticRouterRunner() {
 
+        String routeFieldName = "activeAgent";
         AdkAgentProvider qaRouter = AdkAgentProvider.create("qaRouter", new AdkAgentInvoker() {
             @Override
             public Mono<ResponseFrame> invoke(ExecutableContext context) {
                 // mock request llm and response
-                Map<String, Object> metadata = Map.of("activeAgent", "echoAgent", "answer", "router self answer..balabala...");
+                Map<String, Object> metadata = Map.of(routeFieldName, "echoAgent", "answer", "router self answer..balabala...");
                 context.setMetadata(metadata);
                 return Mono.empty();
             }
@@ -113,10 +115,7 @@ public class RunnerTests {
             }
         });
 
-        BranchSelector branchSelector = (edge, index, size, context) -> {
-            Object activeAgent = context.getMetadata().get("activeAgent");
-            return activeAgent != null && activeAgent.toString().equalsIgnoreCase(edge.getName());
-        };
+        BranchSelector branchSelector = new DefaultRouterSelector(routeFieldName);
 
         AdkAgentProvider qa = AdkAgentProvider.create("echoAgent", new CustomAdkAgentInvoker());
         AdkAgentProvider qa2 = AdkAgentProvider.create("mathAgent", new CustomAdkAgentInvoker2());
