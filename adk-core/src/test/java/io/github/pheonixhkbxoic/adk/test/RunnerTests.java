@@ -10,7 +10,6 @@ import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
 import io.github.pheonixhkbxoic.adk.runtime.*;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
-import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -158,16 +157,21 @@ public class RunnerTests {
             throw new RuntimeException(e);
         }
 
-        Session session = executor.getSessionService().getSession(appName, payload.getUserId(), payload.getSessionId());
-        LinkedList<AdkContext> taskContextChain = session.getTaskContextChain(payload.getTaskId());
+        List<AdkContext> taskContextChain = runner.getTaskChainContextList(payload);
         log.info("taskContextChain: {}", taskContextChain);
 
         // gen uml png
         try {
-            PlantUmlGenerator generator = runner.getPlantUmlGenerator();
-            Graph graph = runner.getGraph();
-            FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
-            generator.generatePng(graph, file);
+            FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
+            runner.generatePng(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // gen task uml png
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+            runner.generateTaskPng(payload, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

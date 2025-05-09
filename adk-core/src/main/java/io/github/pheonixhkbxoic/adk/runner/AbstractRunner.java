@@ -8,12 +8,16 @@ import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
+import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -90,4 +94,21 @@ public abstract class AbstractRunner implements Runner {
         this.exceptionHandler = exceptionHandler;
     }
 
+    @Override
+    public List<AdkContext> getTaskChainContextList(Payload payload) {
+        Session session = executor.getSessionService().getSession(appName, payload.getUserId(), payload.getSessionId());
+        return session.getTaskContextChain(payload.getTaskId());
+    }
+
+    @Override
+    public void generatePng(OutputStream outputStream) throws IOException {
+        PlantUmlGenerator generator = this.getPlantUmlGenerator();
+        generator.generatePng(graph, outputStream);
+    }
+
+    @Override
+    public void generateTaskPng(Payload payload, OutputStream outputStream) throws IOException {
+        List<AdkContext> taskChainContextList = this.getTaskChainContextList(payload);
+        this.getPlantUmlGenerator().generatePng(taskChainContextList, graph, outputStream);
+    }
 }

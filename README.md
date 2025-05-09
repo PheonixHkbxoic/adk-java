@@ -201,6 +201,8 @@ More Runner is oncoming!
 
 ### Support output PNG of Graph with PlantUML
 
+* generate png image with PlantUmlGenerator and Graph
+
 ```java
 public void testGenerateUmlPng() {
     AgentRouterRunner runner = null;
@@ -216,38 +218,78 @@ public void testGenerateUmlPng() {
 }
 ```
 
+* generate png image with Runner directly
+
+```java
+public void generatePngImage() {
+    Runner runner = null;
+    // gen uml png
+    try {
+        FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
+        runner.generatePng(file);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+```
+
+![AgentChain](https://img.plantuml.biz/plantuml/png/RP1B3i8m34JtaNA7MPOSeLrGhi0DGWWa8arAuweBnDt91uges5ZZcIVBTXz9JZGFZhEYE1jJjMI3Xn27g_Pq33FfIGWyE0DQ5AxB6eYB9MKQt6MbzjZL050oQZJGoeGovfla8QlTRVX1ald3h_QMlqZdJbBTVl6F-wQrFzTDQzjc8qNFV7GOEUjJdtxm0W00)
+
+* generate png image with Runner Payload Task directly
+
+```java
+public void generatePngImage() {
+    Runner runner = null;
+    // gen task uml png
+    try {
+        FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+        runner.generateTaskPng(payload, file);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+```
+
+![Agent Router](https://img.plantuml.biz/plantuml/png/ZP7D3e8m3CVlItY79bnq2Iy01F4Ll1eFOrGWpWt7Y0VZkxiDyMDguWxBslxwRzUMWs7QZ4SH4V-AI6_lpdHA0gNh1gNPgD6WfXGk4G58jh76UfSKpeWRZIXJoBaIIgSsKEHLuOMo3tWuTuQtYm0-iKb_1Ki70N0s88GKybRvPcOgq7RdUpEFpEn7uhtUaPasg90-dTaRksT2L8mVNj7PvqcKzVJRFoTc-N1ULxSGrKUaj46_dni0)
+
 ### Example Log
 
 RunnerTests.testAgenticRouterRunner()
 
 ```log
-17:14:39.228 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, start
-17:14:39.233 [main] DEBUG reactor.util.Loggers -- Using Slf4j logging framework
-17:14:39.234 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, start
-17:14:39.234 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, qaRouter
-17:14:39.234 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: invoke, qaRouter
-17:14:39.267 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: invoke, qaRouter
-17:14:39.268 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: route, qaRouter
-17:14:39.268 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: route, qaRouter
-17:14:39.268 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, qaRouter
-17:14:39.268 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, echoAgent
-17:14:39.268 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: invoke, echoAgent
-17:14:39.271 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: invoke, echoAgent
-17:14:39.271 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, echoAgent
-17:14:39.271 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, end
-17:14:39.271 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, end
-17:14:39.287 [main] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- before runAsync
-17:14:39.301 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message0)
-17:14:39.405 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message1)
-17:14:39.511 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message2)
-17:14:39.621 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message3)
-17:14:39.728 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message4)
-17:14:39.836 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message5)
-17:14:39.945 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message6)
-17:14:40.053 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message7)
-17:14:40.160 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message8)
-17:14:40.270 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message9)
-17:14:40.379 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- after runAsync
+20:09:50.624 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, start
+20:09:50.629 [main] DEBUG reactor.util.Loggers -- Using Slf4j logging framework
+20:09:50.630 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, start
+20:09:50.630 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, qaRouter
+20:09:50.630 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: invoke, qaRouter
+20:09:50.666 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: invoke, qaRouter
+20:09:50.666 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: route, qaRouter
+20:09:50.666 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: route, qaRouter
+20:09:50.666 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, qaRouter
+20:09:50.666 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, echoAgent
+20:09:50.666 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: invoke, echoAgent
+20:09:50.672 [Thread-0] INFO io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: invoke, echoAgent
+20:09:50.672 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, echoAgent
+20:09:50.672 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, end
+20:09:50.672 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, end
+20:09:50.689 [main] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- before runAsync
+20:09:50.703 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message0)
+20:09:50.808 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message1)
+20:09:50.920 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message2)
+20:09:51.031 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message3)
+20:09:51.143 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message4)
+20:09:51.255 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message5)
+20:09:51.366 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message6)
+20:09:51.474 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message7)
+20:09:51.583 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message8)
+20:09:51.691 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message9)
+20:09:51.801 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- after runAsync
+20:09:53.698 [main] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- taskContextChain: [{"id": "606e06fb3b4f444090bd73dfc4ab77a3", "name": "root", "node": null, "metadata": {}, "activeParentId": "", "activeChildId": "9dc083f4d8754dbd9658b7dcb1417c1e"}
+, {"id": "9dc083f4d8754dbd9658b7dcb1417c1e", "name": "start", "node": {"type": "start", "status": {"state": "success"}}, "metadata": {}, "activeParentId": "606e06fb3b4f444090bd73dfc4ab77a3", "activeChildId": "19eac3a325764c93b11e68d7a7455426"}
+, {"id": "19eac3a325764c93b11e68d7a7455426", "name": "qaRouter", "node": {"type": "agent_router", "status": {"state": "success"}}, "metadata": {}, "activeParentId": "9dc083f4d8754dbd9658b7dcb1417c1e", "activeChildId": "35f1409202f646328005ed32b076d686"}
+, {"id": "35f1409202f646328005ed32b076d686", "name": "echoAgent", "node": {"type": "agent", "status": {"state": "success"}}, "metadata": {}, "activeParentId": "19eac3a325764c93b11e68d7a7455426", "activeChildId": "09af97ff99ba4f71a872c93b0311ba3c"}
+, {"id": "09af97ff99ba4f71a872c93b0311ba3c", "name": "end", "node": {"type": "end", "status": {"state": "success"}}, "metadata": {}, "activeParentId": "35f1409202f646328005ed32b076d686", "activeChildId": ""}
+]
 @startuml
 start
 partition **AgentRouter** {
@@ -261,6 +303,28 @@ partition **AgentRouter** {
       : fallback;
   endswitch
   : end;
+}
+stop
+@enduml
+@startuml
+start
+partition **AgentRouter** {
+  -[#red]->
+  #green: <color:red><b>start;
+  -[#red]->
+  switch( <color:red><b>qaRouter? )
+    case ( <color:red><b>echoAgent )
+      -[#red]->
+      #green: <color:red><b>echoAgent;
+      -[#red]->
+    case ( mathAgent )
+      : mathAgent;
+    case ( fallback )
+      : fallback;
+  endswitch
+  -[#red]->
+  #green: <color:red><b>end;
+  -[#red]->
 }
 stop
 @enduml

@@ -199,12 +199,13 @@ public class Executor {
         try {
             List<Edge> edgeList = curr.getEdgeList();
 
+            RouterContext routerContext = (RouterContext) currContext;
             BranchSelector selector = curr.getSelector();
             for (int i = 0; i < edgeList.size(); i++) {
                 Edge edge = edgeList.get(i);
-                ExecutableContext routerContext = (ExecutableContext) currContext;
                 boolean ok = selector.select(edge, i, edgeList.size(), routerContext);
                 if (ok || (edge instanceof PlainEdge && ((PlainEdge) edge).isFallback())) {
+                    routerContext.setSelectEdge(edge);
                     Node next = edge.getNode();
                     nextContext = next.buildContextFromParent(currContext);
                     break;
@@ -254,14 +255,14 @@ public class Executor {
         try {
             List<Edge> edgeList = curr.getEdgeList();
 
+            RouterContext routerContext = (RouterContext) currContext;
             BranchSelector selector = curr.getSelector();
             AdkContext nextContext = null;
             for (int i = 0; i < edgeList.size(); i++) {
                 Edge edge = edgeList.get(i);
-                assert currContext instanceof RouterContext;
-                RouterContext routerContext = (RouterContext) currContext;
                 boolean ok = selector.select(edge, i, edgeList.size(), routerContext);
                 if (ok || (edge instanceof PlainEdge && ((PlainEdge) edge).isFallback())) {
+                    routerContext.setSelectEdge(edge);
                     Node next = edge.getNode();
                     nextContext = next.buildContextFromParent(currContext);
                     break;
