@@ -153,13 +153,13 @@ public class Executor {
 
 
         try {
-            AgentInvoker agentInvoker = curr.getAgentInvoker();
-            agentInvoker.beforeInvoke(agentContext);
+            AdkAgentInvoker adkAgentInvoker = curr.getAdkAgentInvoker();
+            adkAgentInvoker.beforeInvoke(agentContext);
             Flux<ResponseFrame> data;
             if (currContext.getPayload().isStream()) {
-                data = agentInvoker.invokeStream(agentContext);
+                data = adkAgentInvoker.invokeStream(agentContext);
             } else {
-                data = agentInvoker.invoke(agentContext).flux();
+                data = adkAgentInvoker.invoke(agentContext).flux();
             }
             agentContext.setResponse(data);
 
@@ -353,13 +353,13 @@ public class Executor {
             currContext.updateStatus(State.of(State.INVOKING));
 
             try {
-                AgentInvoker agentInvoker = ((Agent) curr).getAgentInvoker();
-                agentInvoker.beforeInvoke(agentContext);
+                AdkAgentInvoker adkAgentInvoker = ((Agent) curr).getAdkAgentInvoker();
+                adkAgentInvoker.beforeInvoke(agentContext);
                 Flux<ResponseFrame> data;
                 if (agentContext.getPayload().isStream()) {
-                    data = agentInvoker.invokeStream(agentContext);
+                    data = adkAgentInvoker.invokeStream(agentContext);
                 } else {
-                    data = agentInvoker.invoke(agentContext).flux();
+                    data = adkAgentInvoker.invoke(agentContext).flux();
                 }
                 agentContext.setResponse(data);
 

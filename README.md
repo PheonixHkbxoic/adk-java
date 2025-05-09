@@ -25,15 +25,15 @@ adk-java is a Java implementation of Agent Develop Kit for orchestrating Multi-A
 * simple: just one agent
 
 ```java
-AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
+AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
 AgentRunner runner = AgentRunner.of("Assistant", qa);
 ```
 
 * chain: some agent
 
 ```java
-AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
-AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
+AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
+AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
 AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2);
 ```
 
@@ -42,7 +42,7 @@ AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2);
 * router: router with some agent
 
 ```java
-AgentProvider qaRouter = AgentProvider.create("qaRouter", new AgentInvoker() {
+AdkAgentProvider qaRouter = AdkAgentProvider.create("qaRouter", new AdkAgentInvoker() {
     @Override
     public Mono<ResponseFrame> invoke(ExecutableContext context) {
         // mock request llm and response
@@ -62,9 +62,9 @@ BranchSelector branchSelector = (edge, index, size, context) -> {
     return activeAgent != null && activeAgent.toString().equalsIgnoreCase(edge.getName());
 };
 
-AgentProvider qa = AgentProvider.create("echoAgent", new CustomAgentInvoker());
-AgentProvider qa2 = AgentProvider.create("mathAgent", new CustomAgentInvoker2());
-AgentProvider fallback = AgentProvider.create("fallback", new AgentInvoker() {
+AdkAgentProvider qa = AdkAgentProvider.create("echoAgent", new CustomAdkAgentInvoker());
+AdkAgentProvider qa2 = AdkAgentProvider.create("mathAgent", new CustomAdkAgentInvoker2());
+AdkAgentProvider fallback = AdkAgentProvider.create("fallback", new AdkAgentInvoker() {
     @Override
     public Mono<ResponseFrame> invoke(ExecutableContext context) {
         String answer = (String) context.getMetadata().get("answer");
@@ -115,8 +115,8 @@ ResponseFrame responseFrame = runner.run(payload);
 
 @Test
 public void testAgentChainRunnerAsync() {
-    AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
-    AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
+    AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
+    AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
     AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2);
 
     Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
@@ -140,7 +140,7 @@ user payload support some key properties:
 * userId
 * sessionId
 * stream
-  When stream is true, Runners will use sse by the method `invokeStream` of AgentInvoker to invoke LLM
+  When stream is true, Runners will use sse by the method `invokeStream` of AdkAgentInvoker to invoke LLM
 
 ```java
 Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
@@ -148,12 +148,12 @@ Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").
 
 ### How to interact with LLM
 
-Implements AgentInvoker interface to interact with LLM by any framework, eg.LangChain4j,a2a4j
+Implements AdkAgentInvoker interface to interact with LLM by any framework, eg.LangChain4j,a2a4j
 
 ```java
 
 @Slf4j
-public class CustomAgentInvoker implements AgentInvoker {
+public class CustomAdkAgentInvoker implements AdkAgentInvoker {
 
     @Override
     public Mono<ResponseFrame> invoke(ExecutableContext context) {

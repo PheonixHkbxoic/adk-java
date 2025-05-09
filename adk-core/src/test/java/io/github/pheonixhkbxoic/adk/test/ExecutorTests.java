@@ -34,8 +34,8 @@ public class ExecutorTests {
 
     @Test
     public void test() {
-        CustomAgentInvoker invoker01 = new CustomAgentInvoker();
-        CustomAgentInvoker2 invoker02 = new CustomAgentInvoker2();
+        CustomAdkAgentInvoker invoker01 = new CustomAdkAgentInvoker();
+        CustomAdkAgentInvoker2 invoker02 = new CustomAdkAgentInvoker2();
         End end = End.of();
         Agent agentNode01 = Agent.of("assistant-01", invoker01, end);
         Agent agentNode02 = Agent.of("assistant-02", invoker02, end);

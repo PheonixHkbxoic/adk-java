@@ -1,6 +1,6 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.AgentProvider;
+import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.core.node.Agent;
 import io.github.pheonixhkbxoic.adk.core.node.End;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
@@ -16,24 +16,24 @@ import java.util.List;
  * @desc
  */
 public class AgentRunner extends AbstractRunner {
-    private final List<AgentProvider> agentProviders;
+    private final List<AdkAgentProvider> adkAgentProviders;
 
-    public static AgentRunner of(String appName, AgentProvider... agentProviders) {
-        return new AgentRunner(appName, Arrays.asList(agentProviders));
+    public static AgentRunner of(String appName, AdkAgentProvider... adkAgentProviders) {
+        return new AgentRunner(appName, Arrays.asList(adkAgentProviders));
     }
 
-    protected AgentRunner(String appName, List<AgentProvider> agentProviders) {
+    protected AgentRunner(String appName, List<AdkAgentProvider> adkAgentProviders) {
         super(appName);
-        this.agentProviders = agentProviders;
+        this.adkAgentProviders = adkAgentProviders;
     }
 
     @Override
     protected Graph buildGraph() {
         // build graph
         Node chain = End.of();
-        for (int i = agentProviders.size() - 1; i >= 0; i--) {
-            AgentProvider agentProvider = agentProviders.get(i);
-            chain = Agent.of(agentProvider.getName(), agentProvider.getAgentInvoker(), chain);
+        for (int i = adkAgentProviders.size() - 1; i >= 0; i--) {
+            AdkAgentProvider adkAgentProvider = adkAgentProviders.get(i);
+            chain = Agent.of(adkAgentProvider.getName(), adkAgentProvider.getAdkAgentInvoker(), chain);
         }
         Start start = Start.of(chain);
         return new Graph(appName, start);

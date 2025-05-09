@@ -24,7 +24,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * @desc
  */
 @Slf4j
-public class AgentProviderNodeTests {
+public class AdkAgentProviderNodeTests {
     Executor executor;
 
     @BeforeEach
@@ -34,7 +34,7 @@ public class AgentProviderNodeTests {
 
     @Test
     public void testAgentNode() {
-        CustomAgentInvoker invoker = new CustomAgentInvoker();
+        CustomAdkAgentInvoker invoker = new CustomAdkAgentInvoker();
         Agent agentNode = Agent.of(invoker, End.of());
         Graph graph = new Graph("assistant", Start.of(agentNode));
         RootContext rootCtx = new RootContext(Payload.builder().build());

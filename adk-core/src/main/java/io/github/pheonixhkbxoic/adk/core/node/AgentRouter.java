@@ -2,8 +2,8 @@ package io.github.pheonixhkbxoic.adk.core.node;
 
 import io.github.pheonixhkbxoic.adk.core.NodeType;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
+import io.github.pheonixhkbxoic.adk.runtime.AdkAgentInvoker;
 import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.AgentInvoker;
 import io.github.pheonixhkbxoic.adk.runtime.AgentRouterContext;
 import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
 import lombok.Getter;
@@ -17,12 +17,12 @@ import java.util.List;
  */
 @Getter
 public class AgentRouter extends Router {
-    protected AgentInvoker agentInvoker;
+    protected AdkAgentInvoker adkAgentInvoker;
 
 
-    public AgentRouter(String name, AgentInvoker agentInvoker, List<Edge> edgeList, BranchSelector selector) {
+    public AgentRouter(String name, AdkAgentInvoker adkAgentInvoker, List<Edge> edgeList, BranchSelector selector) {
         super(name, NodeType.AGENT_ROUTER, edgeList, selector);
-        this.agentInvoker = agentInvoker;
+        this.adkAgentInvoker = adkAgentInvoker;
     }
 
     @Override

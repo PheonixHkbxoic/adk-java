@@ -1,7 +1,7 @@
 package io.github.pheonixhkbxoic.adk.test;
 
+import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.AdkUtil;
-import io.github.pheonixhkbxoic.adk.AgentProvider;
 import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
@@ -40,7 +40,7 @@ public class RunnerTests {
 
     @Test
     public void testAgentRunner() {
-        AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
+        AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
         AgentRunner runner = AgentRunner.of("Assistant", qa).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
@@ -53,8 +53,8 @@ public class RunnerTests {
 
     @Test
     public void testAgentChainRunner() {
-        AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
-        AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
+        AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
+        AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
         AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
@@ -77,8 +77,8 @@ public class RunnerTests {
 
     @Test
     public void testAgentChainRunnerAsync() {
-        AgentProvider qa = AgentProvider.create("qaAssistant", new CustomAgentInvoker());
-        AgentProvider qa2 = AgentProvider.create("qaAssistant2", new CustomAgentInvoker2());
+        AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
+        AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
         AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
@@ -98,7 +98,7 @@ public class RunnerTests {
     @Test
     public void testAgenticRouterRunner() {
 
-        AgentProvider qaRouter = AgentProvider.create("qaRouter", new AgentInvoker() {
+        AdkAgentProvider qaRouter = AdkAgentProvider.create("qaRouter", new AdkAgentInvoker() {
             @Override
             public Mono<ResponseFrame> invoke(ExecutableContext context) {
                 // mock request llm and response
@@ -118,9 +118,9 @@ public class RunnerTests {
             return activeAgent != null && activeAgent.toString().equalsIgnoreCase(edge.getName());
         };
 
-        AgentProvider qa = AgentProvider.create("echoAgent", new CustomAgentInvoker());
-        AgentProvider qa2 = AgentProvider.create("mathAgent", new CustomAgentInvoker2());
-        AgentProvider fallback = AgentProvider.create("fallback", new AgentInvoker() {
+        AdkAgentProvider qa = AdkAgentProvider.create("echoAgent", new CustomAdkAgentInvoker());
+        AdkAgentProvider qa2 = AdkAgentProvider.create("mathAgent", new CustomAdkAgentInvoker2());
+        AdkAgentProvider fallback = AdkAgentProvider.create("fallback", new AdkAgentInvoker() {
             @Override
             public Mono<ResponseFrame> invoke(ExecutableContext context) {
                 String answer = (String) context.getMetadata().get("answer");
