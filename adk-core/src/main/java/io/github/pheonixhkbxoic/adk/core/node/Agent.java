@@ -24,7 +24,7 @@ public class Agent extends AbstractChainNode {
     }
 
     public static Agent of(String name, AdkAgentInvoker adkAgentInvoker, Node next) {
-        return new Agent(name, adkAgentInvoker, PlainEdge.of(next));
+        return new Agent(name, adkAgentInvoker, next == null ? null : PlainEdge.of(next));
     }
 
     private Agent(String name, AdkAgentInvoker adkAgentInvoker, Edge edge) {

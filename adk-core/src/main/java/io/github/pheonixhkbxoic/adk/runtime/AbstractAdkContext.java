@@ -23,6 +23,7 @@ public class AbstractAdkContext implements AdkContext {
     protected String name;
     protected AdkContext activeParent;
     protected AdkContext activeChild;
+    protected LoopContext loopContext;
     protected Payload payload;
     protected Flux<ResponseFrame> response;
     private Map<String, Object> metadata;
@@ -39,6 +40,12 @@ public class AbstractAdkContext implements AdkContext {
             this.payload = parent.getPayload();
             this.response = parent.getResponse();
             this.metadata = parent.getMetadata();
+
+            if (parent instanceof LoopContext) {
+                this.loopContext = ((LoopContext) parent);
+            } else {
+                this.loopContext = parent.getLoopContext();
+            }
         }
     }
 

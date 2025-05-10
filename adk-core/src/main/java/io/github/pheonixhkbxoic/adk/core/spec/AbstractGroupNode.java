@@ -17,11 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 public abstract class AbstractGroupNode extends AbstractNode {
     protected Node entry;
+    protected Node next;
 
 
-    public AbstractGroupNode(String name, Node entry) {
+    public AbstractGroupNode(String name, Node entry, Node next) {
         super(name, NodeType.GROUP);
         this.entry = entry;
+        this.next = next;
     }
 
 

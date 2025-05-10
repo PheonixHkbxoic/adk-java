@@ -10,4 +10,10 @@ import lombok.Data;
 @Data
 public class ResponseFrame {
     private String message;
+
+    public static ResponseFrame of(String message) {
+        ResponseFrame r = new ResponseFrame();
+        r.setMessage(message);
+        return r;
+    }
 }

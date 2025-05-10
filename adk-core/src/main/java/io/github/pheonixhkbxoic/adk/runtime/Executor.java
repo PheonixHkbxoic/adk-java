@@ -78,7 +78,7 @@ public class Executor {
                 // execute and go next context
                 session.updateSession(curr.getPayload().getTaskId(), curr);
                 curr.updateStatus(State.of(State.EXECUTING));
-                AdkContext context = this.doExecute(appName, curr, latchParallel);
+                AdkContext context = this.doExecute(appName, session, curr, latchParallel);
                 curr.updateStatus(State.of(State.SUCCESS));
                 if (context != null) {
                     last = context;
@@ -110,10 +110,14 @@ public class Executor {
         return last;
     }
 
-    private AdkContext doExecute(String appName, AdkContext currContext, CountDownLatch latchParallel) {
+    private AdkContext doExecute(String appName, Session session, AdkContext currContext, CountDownLatch latchParallel) {
         AdkContext nextContext = null;
         Node curr = currContext.getNode();
-        if (curr instanceof AbstractBranchesNode) {
+        if (curr instanceof Group) {
+            if (curr instanceof Loop) {
+                nextContext = this.doExecuteLoopNode(appName, session, currContext, ((Loop) curr));
+            }
+        } else if (curr instanceof AbstractBranchesNode) {
             if (curr instanceof AgentRouter) {
                 nextContext = this.doExecuteAgenticRouterNode(currContext, ((AgentRouter) curr));
             } else if (curr instanceof Router) {
@@ -135,6 +139,26 @@ public class Executor {
             throw new RuntimeException("unknown node type" + curr.getClass().getName());
         }
         return nextContext;
+    }
+
+    private AdkContext doExecuteLoopNode(String appName, Session session, AdkContext currContext, Loop curr) {
+        LoopContext loopContext = (LoopContext) currContext;
+        int epoch = 0;
+        AdkContext parent = loopContext;
+        while (((loopContext.getMaxEpoch() <= 0 || epoch < loopContext.getMaxEpoch()) && !loopContext.isBreaked())) {
+            Node entry = curr.getEntry();
+            loopContext.setEpoch(epoch);
+            AdkContext entryContext = entry.buildContextFromParent(parent);
+            // execute nodes in loop
+            parent = this.execute(appName, session, entryContext, null);
+            epoch++;
+        }
+
+        loopContext.setResponse(parent.getResponse());
+        loopContext.setMetadata(parent.getMetadata());
+
+        Node next = curr.getNext();
+        return next.buildContextFromParent(loopContext);
     }
 
     private AdkContext doExecuteAgenticRouterNode(AdkContext currContext, AgentRouter curr) {

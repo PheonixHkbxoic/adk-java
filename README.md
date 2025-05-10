@@ -90,9 +90,9 @@ AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchS
       ```java
       public void customAndRun(){
         // define params
-        Payload payload = null;
-        Executor executor = null;
-        Graph graph = null;
+        Payload payload;
+        Executor executor;
+        Graph graph;
         RootContext rootContext = new RootContext(payload);
       
         // execute
@@ -194,8 +194,12 @@ AgentRunner runner = AgentRunner.of("Assistant", qa).initExecutor(executor);
 
 Runner is high level api for Orchestrating your agents and run it synchronously or asynchronously.
 
-* AgentRunner
-* AgentRouterRunner
+* AgentRunner  
+  ![AgentRunner](https://img.plantuml.biz/plantuml/png/SoWkIImgAStDuUK2itYv2e1aPabcVfw2bfPZUcfUYND6OcQUbfP2DI-NWe9kj79HQagihXs8evnUb9gQPwLWavoVarza1PImiqco0vjZZQ6O29s5YOx5nPb0_NaKwpSYou3Kl1HqVRMWWCaluELo04e2mma0)
+* AgentRouterRunner  
+  ![AgentRouterRunner](https://img.plantuml.biz/plantuml/png/ZP7D3e8m3CVlItY79bnq2Iy01F4Ll1eFOrGWpWt7Y0VZkxiDyMDguWxBslxwRzUMWs7QZ4SH4V-AI6_lpdHA0gNh1gNPgD6WfXGk4G58jh76UfSKpeWRZIXJoBaIIgSsKEHLuOMo3tWuTuQtYm0-iKb_1Ki70N0s88GKybRvPcOgq7RdUpEFpEn7uhtUaPasg90-dTaRksT2L8mVNj7PvqcKzVJRFoTc-N1ULxSGrKUaj46_dni0)
+* LoopRunner  
+  ![LoopRunner](https://img.plantuml.biz/plantuml/png/bL9RQy8m57ulz3zy8eW6P6EmbxOM5VRcFnXxoEoX5cDIO-g5kV--OxAvhIfiRyavt-NSnXidhMjMAexyAuw6prrBnSimZwEQ0vMhZ8OGCsFgIKdQ2O6tE09-u81kQObqWcnkbB499_BiDVUAwGMujAQfMLAnf12do2q1jhE7D21-IG2xHQK8_HO1_PNSFzLcla0smZsEHr3uuIinGA-7JhMPMf9BAZ08UXS6jsfQIp-6z9yqsahLI4VVv3EnrO8lEC73tIFELIPmjg5FJzA5x_xgNAwxQze7K-Q6-VznXOnlB_3zT2g61SQSz9Vp0G00)
 
 More Runner is oncoming!
 
@@ -205,7 +209,7 @@ More Runner is oncoming!
 
 ```java
 public void testGenerateUmlPng() {
-    AgentRouterRunner runner = null;
+    AgentRouterRunner runner;
     // gen uml png
     try {
         PlantUmlGenerator generator = runner.getPlantUmlGenerator();
@@ -222,7 +226,7 @@ public void testGenerateUmlPng() {
 
 ```java
 public void generatePngImage() {
-    Runner runner = null;
+    Runner runner;
     // gen uml png
     try {
         FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
@@ -239,7 +243,7 @@ public void generatePngImage() {
 
 ```java
 public void generatePngImage() {
-    Runner runner = null;
+    Runner runner;
     // gen task uml png
     try {
         FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");

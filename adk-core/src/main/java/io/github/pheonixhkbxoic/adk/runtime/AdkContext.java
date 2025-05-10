@@ -26,6 +26,13 @@ public interface AdkContext extends Adk {
 
     void setActiveChild(AdkContext child);
 
+    /**
+     * get LoopContext
+     *
+     * @return return LoopContext if in Loop node, otherwise return null
+     */
+    LoopContext getLoopContext();
+
     Payload getPayload();
 
     void setResponse(Flux<ResponseFrame> responseFrameFlux);

@@ -10,9 +10,9 @@ import io.github.pheonixhkbxoic.adk.core.spec.Node;
  */
 public class Group extends AbstractGroupNode {
 
-    public Group(String name, Node entry) {
-        super(name, entry);
+    public Group(String name, Node entry, Node next) {
+        super(name, entry, next);
     }
 
-    
+
 }

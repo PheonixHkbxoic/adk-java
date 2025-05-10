@@ -8,6 +8,7 @@ import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
+import io.github.pheonixhkbxoic.adk.runner.LoopRunner;
 import io.github.pheonixhkbxoic.adk.runtime.*;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -53,9 +55,10 @@ public class RunnerTests {
 
     @Test
     public void testAgentChainRunner() {
+        String appName = "AgentChain";
         AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
         AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
-        AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
+        AgentRunner runner = AgentRunner.of(appName, qa, qa2).initExecutor(executor);
 
         Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
 
@@ -73,6 +76,13 @@ public class RunnerTests {
             throw new RuntimeException(e);
         }
 
+        // gen task uml png
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+            runner.generateTaskPng(payload, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -177,5 +187,84 @@ public class RunnerTests {
         }
     }
 
+    @Test
+    public void testLoopRunner() {
+        String appName = "LoopAgent";
 
+        AdkAgentProvider first = AdkAgentProvider.create("qaAgent", new AdkAgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                LoopContext loopContext = context.getLoopContext();
+                if (loopContext != null) {
+                    log.info("node in loop: {}, loop name: {}, loop epoch: {}, loop maxEpoch: {}",
+                            context.getNode().getName(), loopContext.getName(), loopContext.getEpoch(), loopContext.getMaxEpoch());
+                    String message = String.format("round %d %s: %s", loopContext.getEpoch() + 1, context.getName(), "message xxx");
+                    return Mono.just(ResponseFrame.of(message));
+                }
+                return Mono.empty();
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                return this.invoke(context).flux();
+            }
+        });
+        AdkAgentProvider second = AdkAgentProvider.create("evaluateAgent", new AdkAgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                if (context.getMetadata() == null) {
+                    context.setMetadata(new HashMap<>());
+                }
+
+                // evaluate qa score, exit if score > 80
+                if (context.getLoopContext() != null) {
+                    // mock evaluate score
+                    double score = Double.parseDouble(context.getMetadata().getOrDefault("score", "0").toString());
+                    score += 42;
+                    context.getMetadata().put("score", score);
+                    if (score > 80) {
+                        context.getLoopContext().setBreaked(true);
+                    }
+                }
+                return Mono.justOrEmpty(context.getResponse()
+                        .map(r -> {
+                            r.setMessage(r.getMessage() + " evaluated");
+                            return r;
+                        })
+                        .blockFirst());
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                return this.invoke(context).flux();
+            }
+        });
+        LoopRunner runner = LoopRunner.of(appName, 5, first, second)
+                .initExecutor(executor);
+
+        Payload payload = Payload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .message("hello")
+                .build();
+
+        // runAsync
+        ResponseFrame responseFrame = runner.run(payload);
+        log.info("loop runner responseFrame: {}", responseFrame.getMessage());
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
+            runner.generatePng(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+            runner.generateTaskPng(payload, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
