@@ -106,7 +106,7 @@ public class RunnerTests {
 
 
     @Test
-    public void testAgenticRouterRunner() {
+    public void testAgentRouterRunner() {
 
         String routeFieldName = "activeAgent";
         AdkAgentProvider qaRouter = AdkAgentProvider.create("qaRouter", new AdkAgentInvoker() {
@@ -159,7 +159,7 @@ public class RunnerTests {
                 .doFirst(() -> log.info("before runAsync"))
                 .doOnError(e -> log.error("error runAsync: {}", e.getMessage(), e))
                 .doOnComplete(() -> log.info("after runAsync"))
-                .subscribe(responseFrame -> log.info("agentic router runAsync responseFrame: {}", responseFrame));
+                .subscribe(responseFrame -> log.info("agent router runAsync responseFrame: {}", responseFrame));
 
         try {
             TimeUnit.SECONDS.sleep(3);

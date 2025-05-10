@@ -119,7 +119,7 @@ public class Executor {
             }
         } else if (curr instanceof AbstractBranchesNode) {
             if (curr instanceof AgentRouter) {
-                nextContext = this.doExecuteAgenticRouterNode(currContext, ((AgentRouter) curr));
+                nextContext = this.doExecuteAgentRouterNode(currContext, ((AgentRouter) curr));
             } else if (curr instanceof Router) {
                 nextContext = this.doExecuteRouterNode(currContext, ((Router) curr));
             } else if (curr instanceof Scatter) {
@@ -161,11 +161,11 @@ public class Executor {
         return next.buildContextFromParent(loopContext);
     }
 
-    private AdkContext doExecuteAgenticRouterNode(AdkContext currContext, AgentRouter curr) {
+    private AdkContext doExecuteAgentRouterNode(AdkContext currContext, AgentRouter curr) {
 
         ExecutableContext agentContext = (ExecutableContext) currContext;
         Node agent = agentContext.getNode();
-        // invoke agentic
+        // invoke agent
         Event eventAgentBefore = Event.builder()
                 .type(Event.INVOKE)
                 .nodeId(agent.getId())

@@ -258,7 +258,7 @@ public void generatePngImage() {
 
 ### Example Log
 
-RunnerTests.testAgenticRouterRunner()
+RunnerTests.testAgentRouterRunner()
 
 ```log
 20:09:50.624 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, start
@@ -277,16 +277,16 @@ RunnerTests.testAgenticRouterRunner()
 20:09:50.672 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- before event: execute, end
 20:09:50.672 [Thread-0] DEBUG io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener -- after event: execute, end
 20:09:50.689 [main] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- before runAsync
-20:09:50.703 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message0)
-20:09:50.808 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message1)
-20:09:50.920 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message2)
-20:09:51.031 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message3)
-20:09:51.143 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message4)
-20:09:51.255 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message5)
-20:09:51.366 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message6)
-20:09:51.474 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message7)
-20:09:51.583 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message8)
-20:09:51.691 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agentic router runAsync responseFrame: ResponseFrame(message=message9)
+20:09:50.703 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message0)
+20:09:50.808 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message1)
+20:09:50.920 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message2)
+20:09:51.031 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message3)
+20:09:51.143 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message4)
+20:09:51.255 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message5)
+20:09:51.366 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message6)
+20:09:51.474 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message7)
+20:09:51.583 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message8)
+20:09:51.691 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- agent router runAsync responseFrame: ResponseFrame(message=message9)
 20:09:51.801 [boundedElastic-1] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- after runAsync
 20:09:53.698 [main] INFO io.github.pheonixhkbxoic.adk.test.RunnerTests -- taskContextChain: [{"id": "606e06fb3b4f444090bd73dfc4ab77a3", "name": "root", "node": null, "metadata": {}, "activeParentId": "", "activeChildId": "9dc083f4d8754dbd9658b7dcb1417c1e"}
 , {"id": "9dc083f4d8754dbd9658b7dcb1417c1e", "name": "start", "node": {"type": "start", "status": {"state": "success"}}, "metadata": {}, "activeParentId": "606e06fb3b4f444090bd73dfc4ab77a3", "activeChildId": "19eac3a325764c93b11e68d7a7455426"}
