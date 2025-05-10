@@ -13,19 +13,19 @@ import java.util.List;
  * @date 2025/5/10 17:19
  * @desc
  */
-public class LoopRunner extends AbstractRunner {
+public class AgentLoopRunner extends AbstractRunner {
     private final int maxEpoch;
     private final List<AdkAgentProvider> adkAgentProviderList;
 
-    public static LoopRunner of(String appName, AdkAgentProvider... agentProviders) {
+    public static AgentLoopRunner of(String appName, AdkAgentProvider... agentProviders) {
         return of(appName, -1, agentProviders);
     }
 
-    public static LoopRunner of(String appName, int maxEpoch, AdkAgentProvider... agentProviders) {
-        return new LoopRunner(appName, maxEpoch, agentProviders);
+    public static AgentLoopRunner of(String appName, int maxEpoch, AdkAgentProvider... agentProviders) {
+        return new AgentLoopRunner(appName, maxEpoch, agentProviders);
     }
 
-    protected LoopRunner(String appName, int maxEpoch, AdkAgentProvider... agentProviders) {
+    protected AgentLoopRunner(String appName, int maxEpoch, AdkAgentProvider... agentProviders) {
         super(appName);
         this.maxEpoch = maxEpoch;
         this.adkAgentProviderList = new ArrayList<>(List.of(agentProviders));

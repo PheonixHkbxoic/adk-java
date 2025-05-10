@@ -6,9 +6,9 @@ import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.edge.DefaultRouterSelector;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
+import io.github.pheonixhkbxoic.adk.runner.AgentLoopRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
-import io.github.pheonixhkbxoic.adk.runner.LoopRunner;
 import io.github.pheonixhkbxoic.adk.runtime.*;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
@@ -188,8 +188,8 @@ public class RunnerTests {
     }
 
     @Test
-    public void testLoopRunner() {
-        String appName = "LoopAgent";
+    public void testAgentLoopRunner() {
+        String appName = "AgentLoop";
 
         AdkAgentProvider first = AdkAgentProvider.create("qaAgent", new AdkAgentInvoker() {
             @Override
@@ -239,7 +239,7 @@ public class RunnerTests {
                 return this.invoke(context).flux();
             }
         });
-        LoopRunner runner = LoopRunner.of(appName, 5, first, second)
+        AgentLoopRunner runner = AgentLoopRunner.of(appName, 5, first, second)
                 .initExecutor(executor);
 
         Payload payload = Payload.builder()
