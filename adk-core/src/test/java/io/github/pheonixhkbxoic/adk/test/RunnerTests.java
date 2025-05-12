@@ -7,6 +7,7 @@ import io.github.pheonixhkbxoic.adk.core.edge.DefaultRouterSelector;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
 import io.github.pheonixhkbxoic.adk.runner.AgentLoopRunner;
+import io.github.pheonixhkbxoic.adk.runner.AgentParallelRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
 import io.github.pheonixhkbxoic.adk.runtime.*;
@@ -267,4 +268,67 @@ public class RunnerTests {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void testAgentParallelRunner() {
+        String appName = "AgentParallel";
+        AdkAgentProvider tasksGeneratorAgent = AdkAgentProvider.create("tasksGeneratorAgent", new AdkAgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                return Mono.empty();
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                // mock agent generate tasks
+                return Flux.create(sink -> {
+                    for (int i = 0; i < 4; i++) {
+                        sink.next(ResponseFrame.of(String.format("task-%02d", i)));
+                    }
+                    sink.complete();
+                });
+            }
+        });
+
+        AdkAgentProvider taskHandlerAgent = AdkAgentProvider.create("taskHandlerAgent", new AdkAgentInvoker() {
+            @Override
+            public Mono<ResponseFrame> invoke(ExecutableContext context) {
+                return Mono.just(ResponseFrame.of("task handler message xxx"));
+            }
+
+            @Override
+            public Flux<ResponseFrame> invokeStream(ExecutableContext context) {
+                return this.invoke(context).flux();
+            }
+        });
+        AgentParallelRunner runner = AgentParallelRunner.of(appName, tasksGeneratorAgent, taskHandlerAgent)
+                .initExecutor(executor);
+
+        Payload payload = Payload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .message("hello")
+                .build();
+
+        // runAsync
+        ResponseFrame responseFrame = runner.run(payload);
+        log.info("parallel runner responseFrame: {}", responseFrame.getMessage());
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
+            runner.generatePng(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+            runner.generateTaskPng(payload, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

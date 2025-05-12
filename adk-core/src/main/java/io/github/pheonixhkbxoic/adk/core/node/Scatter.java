@@ -3,6 +3,8 @@ package io.github.pheonixhkbxoic.adk.core.node;
 import io.github.pheonixhkbxoic.adk.core.NodeType;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.spec.AbstractBranchesNode;
+import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.runtime.ExecutableContext;
 
 import java.util.List;
 
@@ -17,4 +19,8 @@ public class Scatter extends AbstractBranchesNode {
         super(name, NodeType.SCATTER, edgeList);
     }
 
+    @Override
+    public AdkContext buildContextFromParent(AdkContext parent) {
+        return new ExecutableContext(parent, this);
+    }
 }

@@ -1,4 +1,4 @@
-package io.github.pheonixhkbxoic.adk.core.edge;
+package io.github.pheonixhkbxoic.adk.core.interfaces;
 
 /**
  * @author PheonixHkbxoic
@@ -9,5 +9,5 @@ package io.github.pheonixhkbxoic.adk.core.edge;
 public interface TriPredicate<T, U, V> {
 
     boolean test(T t, U u, V v);
-    
+
 }

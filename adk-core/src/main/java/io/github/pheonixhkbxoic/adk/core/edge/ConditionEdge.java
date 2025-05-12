@@ -1,5 +1,6 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
+import io.github.pheonixhkbxoic.adk.core.interfaces.ConditionEdgePredicate;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 
@@ -9,14 +10,14 @@ import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
  * @desc
  */
 public class ConditionEdge extends PlainEdge {
-    protected TriPredicate<Integer, Integer, AdkContext> condition;
+    protected ConditionEdgePredicate condition;
 
-    public ConditionEdge(String name, TriPredicate<Integer, Integer, AdkContext> condition, Node node) {
+    public ConditionEdge(String name, ConditionEdgePredicate condition, Node node) {
         super(name, node, false);
         this.condition = condition;
     }
 
-    public static ConditionEdge of(String name, TriPredicate<Integer, Integer, AdkContext> condition, Node next) {
+    public static ConditionEdge of(String name, ConditionEdgePredicate condition, Node next) {
         return new ConditionEdge(name, condition, next);
     }
 

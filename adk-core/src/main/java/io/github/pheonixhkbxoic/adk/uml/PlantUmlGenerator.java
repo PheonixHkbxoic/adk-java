@@ -9,6 +9,7 @@ import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import io.github.pheonixhkbxoic.adk.runtime.LoopContext;
 import io.github.pheonixhkbxoic.adk.runtime.RouterContext;
+import io.github.pheonixhkbxoic.adk.runtime.ScatterContext;
 import lombok.Data;
 import net.sourceforge.plantuml.SourceStringReader;
 
@@ -224,9 +225,10 @@ public class PlantUmlGenerator {
                 boolean appendEndFlag = i == edgeList.size() - 1;
                 Edge edge = edgeList.get(i);
                 if (contextIndex < contextList.size()
-                        && contextList.get(contextIndex) != null
-                        && contextList.get(contextIndex) instanceof RouterContext
-                        && ((RouterContext) contextList.get(contextIndex)).getSelectEdge().getName().equalsIgnoreCase(edge.getName())) {
+                        && contextList.get(contextIndex) != null && (
+                        contextList.get(contextIndex) instanceof RouterContext && ((RouterContext) contextList.get(contextIndex)).getSelectEdge().getName().equalsIgnoreCase(edge.getName())
+                                || contextList.get(contextIndex) instanceof ScatterContext)
+                ) {
                     uml.append(repeat(indent)).append(String.format("case ( %s%s )", activeLabelStyle, edge.getName())).append("\n");
                     uml.append(this.buildUmlNode(contextList, contextIndex, edge.getNode(), indent, indentStartNode, true, appendEndFlag));
                 } else {

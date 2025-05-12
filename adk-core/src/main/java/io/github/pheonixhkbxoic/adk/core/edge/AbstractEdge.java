@@ -18,7 +18,7 @@ public abstract class AbstractEdge implements Edge {
     public AbstractEdge(String name) {
         this.id = AdkUtil.uuid4hex();
         this.name = name;
-        if (AdkUtil.isEmpty(name)) {
+        if (name == null) {
             String simpleName = this.getClass().getSimpleName();
             this.name = simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1);
         }

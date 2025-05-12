@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 @Data
 public class Session {
     private String sessionId;
-    private ConcurrentMap<String, LinkedList<AdkContext>> taskContextChainMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, LinkedList<AdkContext>> taskContextChainMap;
 
     public Session(String sessionId) {
         this.sessionId = sessionId;
@@ -25,7 +25,12 @@ public class Session {
     }
 
     public void updateSession(String taskId, AdkContext adkContext) {
-        this.getTaskContextChain(taskId).add(adkContext);
+        LinkedList<AdkContext> chain = this.getTaskContextChain(taskId);
+        boolean exist = chain.stream().anyMatch(c -> c.getId().equalsIgnoreCase(adkContext.getId()));
+        if (exist) {
+            return;
+        }
+        chain.add(adkContext);
     }
 
     public LinkedList<AdkContext> getTaskContextChain(String taskId) {

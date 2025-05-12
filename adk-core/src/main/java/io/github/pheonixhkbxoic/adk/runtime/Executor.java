@@ -16,16 +16,22 @@ import io.github.pheonixhkbxoic.adk.exception.PlainEdgeFallbackCountCheckExcepti
 import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.session.SessionService;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 /**
  * @author PheonixHkbxoic
  * @date 2025/5/6 06:23
  * @desc
  */
+@Slf4j
 public class Executor {
     @Getter
     private final SessionService sessionService;
@@ -55,10 +61,10 @@ public class Executor {
 
         Node curr = graph.getStart();
         AdkContext currContext = curr.buildContextFromParent(rootContext);
-        return this.execute(appName, session, currContext, null);
+        return this.execute(appName, session, currContext);
     }
 
-    private AdkContext execute(String appName, Session session, AdkContext currContext, CountDownLatch latchParallel) {
+    private AdkContext execute(String appName, Session session, AdkContext currContext) {
         AdkContext last = currContext;
         AdkContext curr = currContext;
         while (curr != null) {
@@ -78,7 +84,7 @@ public class Executor {
                 // execute and go next context
                 session.updateSession(curr.getPayload().getTaskId(), curr);
                 curr.updateStatus(State.of(State.EXECUTING));
-                AdkContext context = this.doExecute(appName, session, curr, latchParallel);
+                AdkContext context = this.doExecute(appName, session, curr);
                 curr.updateStatus(State.of(State.SUCCESS));
                 if (context != null) {
                     last = context;
@@ -110,7 +116,7 @@ public class Executor {
         return last;
     }
 
-    private AdkContext doExecute(String appName, Session session, AdkContext currContext, CountDownLatch latchParallel) {
+    private AdkContext doExecute(String appName, Session session, AdkContext currContext) {
         AdkContext nextContext = null;
         Node curr = currContext.getNode();
         if (curr instanceof Group) {
@@ -126,12 +132,8 @@ public class Executor {
                 nextContext = this.doExecuteScatterNode(appName, currContext, ((Scatter) curr));
             }
         } else if (curr instanceof Aggregator) {
-            if (latchParallel != null) {
-                latchParallel.countDown();
-            } else {
-                Node next = ((Aggregator) curr).getEdge().getNode();
-                nextContext = next.buildContextFromParent(currContext);
-            }
+            // nop
+            return null;
         } else if (curr instanceof AbstractChainNode) {
             nextContext = this.doExecuteChainNode(currContext, ((AbstractChainNode) curr));
         } else {
@@ -150,7 +152,7 @@ public class Executor {
             loopContext.setEpoch(epoch);
             AdkContext entryContext = entry.buildContextFromParent(parent);
             // execute nodes in loop
-            parent = this.execute(appName, session, entryContext, null);
+            parent = this.execute(appName, session, entryContext);
             epoch++;
         }
 
@@ -321,8 +323,55 @@ public class Executor {
     }
 
     private AdkContext doExecuteScatterNode(String appName, AdkContext currContext, Scatter curr) {
+        if (curr instanceof AgentParallel) {
+            AgentParallelContext agentContext = (AgentParallelContext) currContext;
+            Event eventBefore = Event.builder()
+                    .type(Event.INVOKE)
+                    .nodeId(curr.getId())
+                    .nodeName(curr.getName())
+                    .stream(agentContext.getPayload().isStream())
+                    .build();
+            eventService.send(eventBefore);
+            currContext.updateStatus(State.of(State.INVOKING));
+
+            try {
+                AdkAgentInvoker adkAgentInvoker = ((AgentParallel) curr).getAdkAgentInvoker();
+                adkAgentInvoker.beforeInvoke(agentContext);
+                Flux<ResponseFrame> data = adkAgentInvoker.invokeStream(agentContext);
+                agentContext.setResponse(data);
+
+                // generate edges
+                Consumer<Flux<ResponseFrame>> scatterBranchesGenerator = ((AgentParallel) curr).getScatterBranchesGenerator();
+                if (scatterBranchesGenerator != null) {
+                    scatterBranchesGenerator.accept(data);
+                }
+
+                Event eventAfter = Event.builder()
+                        .type(Event.INVOKE)
+                        .nodeId(curr.getId())
+                        .nodeName(curr.getName())
+                        .stream(currContext.getPayload().isStream())
+                        .complete(true)
+                        .build();
+                eventService.send(eventAfter);
+            } catch (Throwable e) {
+                Event eventAfter = Event.builder()
+                        .type(Event.INVOKE)
+                        .nodeId(curr.getId())
+                        .nodeName(curr.getName())
+                        .stream(currContext.getPayload().isStream())
+                        .complete(true)
+                        .error(e)
+                        .build();
+                eventService.send(eventAfter);
+                throw e;
+            }
+        }
+
         List<Edge> edgeList = curr.getEdgeList();
-        int parallelCount = curr.getEdgeList().size();
+        if (edgeList == null || edgeList.isEmpty()) {
+            throw new AdkException("scatter no edge exception");
+        }
         if (es == null) {
             es = Executors.newCachedThreadPool();
         }
@@ -330,36 +379,50 @@ public class Executor {
             Payload payload = currContext.getPayload();
             Session session = this.sessionService.getSession(appName, payload.getUserId(), payload.getSessionId());
 
-            CountDownLatch latch = new CountDownLatch(parallelCount);
+            // branch parallel execute
             List<Future<AdkContext>> parallelFutureList = edgeList.stream()
                     .map(edge -> {
                         final Node currParallel = edge.getNode();
                         AdkContext currContextParallel = currParallel.buildContextFromParent(currContext);
-                        return es.submit(() -> this.execute(appName, session, currContextParallel, latch));
+                        return es.submit(() -> this.execute(appName, session, currContextParallel));
                     })
                     .toList();
-            // await all thread arrive Aggregator
-            latch.await();
-
-            // check
-            List<AdkContext> resultParallel = parallelFutureList.stream().map(ec -> {
-                try {
-                    return ec.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
+            List<Future<AdkContext>> pendingList = new ArrayList<>(parallelFutureList);
+            List<AdkContext> arrivedContextList = new ArrayList<>(parallelFutureList.size());
+            int branchSize = parallelFutureList.size();
+            while (arrivedContextList.size() <= branchSize && !pendingList.isEmpty()) {
+                for (Future<AdkContext> adkContextFuture : pendingList) {
+                    if (adkContextFuture.isDone()) {
+                        try {
+                            AdkContext finishedContext = adkContextFuture.get();
+                            arrivedContextList.add(finishedContext);
+                        } catch (Exception e) {
+                            log.warn("scatter branch execution exception: {}", e.getMessage(), e);
+                        }
+                        // always remove
+                        pendingList.remove(adkContextFuture);
+                        break;
+                    }
                 }
-            }).toList();
-            long count = resultParallel.stream().map(AdkContext::getId).distinct().count();
-            if (count != 1) {
-                throw new RuntimeException("All of scatter branches should end with aggregator");
+                if (!arrivedContextList.isEmpty()) {
+                    AdkContext aggregatorContext = arrivedContextList.get(0);
+                    Aggregator aggregator = ((Aggregator) aggregatorContext.getNode());
+                    if (aggregator.getNextPredicate().test(arrivedContextList.size(), branchSize, arrivedContextList)) {
+                        break;
+                    }
+                }
             }
-            // goto aggregator
-            AdkContext nextContext = resultParallel.get(0);
-            // TODO resultParallel merge
+            // cancel unfinished tasks
+            pendingList.forEach(unfinished -> unfinished.cancel(true));
 
+            // aggregator canNext
+            AdkContext aggregatorContext = arrivedContextList.get(0);
+            aggregatorContext.setResponse(currContext.getResponse());
+            Aggregator aggregator = ((Aggregator) aggregatorContext.getNode());
+            aggregator.getDataMerger().accept((AggregatorContext) aggregatorContext, arrivedContextList);
 
-            return nextContext;
-        } catch (InterruptedException | RuntimeException e) {
+            return aggregator.getEdge().getNode().buildContextFromParent(aggregatorContext);
+        } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
