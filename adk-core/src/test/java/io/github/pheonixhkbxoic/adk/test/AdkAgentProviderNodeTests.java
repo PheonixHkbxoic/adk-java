@@ -1,15 +1,15 @@
 package io.github.pheonixhkbxoic.adk.test;
 
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.RootContext;
 import io.github.pheonixhkbxoic.adk.core.node.Agent;
 import io.github.pheonixhkbxoic.adk.core.node.End;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.core.node.Start;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
-import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ public class AdkAgentProviderNodeTests {
         CustomAdkAgentInvoker invoker = new CustomAdkAgentInvoker();
         Agent agentNode = Agent.of(invoker, End.of());
         Graph graph = new Graph("assistant", Start.of(agentNode));
-        RootContext rootCtx = new RootContext(Payload.builder().build());
+        RootContext rootCtx = new RootContext(AdkPayload.builder().build());
         AdkContext ec = executor.execute(graph, rootCtx);
         Flux<ResponseFrame> frames = ec.getResponse();
         assertThat(frames).isNotNull();

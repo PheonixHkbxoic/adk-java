@@ -1,9 +1,10 @@
-package io.github.pheonixhkbxoic.adk.runtime;
+package io.github.pheonixhkbxoic.adk.context;
 
-import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.Status;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import lombok.Getter;
 import lombok.Setter;
 import reactor.core.publisher.Flux;
@@ -24,7 +25,7 @@ public class AbstractAdkContext implements AdkContext {
     protected AdkContext activeParent;
     protected AdkContext activeChild;
     protected LoopContext loopContext;
-    protected Payload payload;
+    protected AdkPayload payload;
     protected Flux<ResponseFrame> response;
     private Map<String, Object> metadata;
 

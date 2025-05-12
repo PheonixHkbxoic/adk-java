@@ -1,13 +1,15 @@
 package io.github.pheonixhkbxoic.adk.test;
 
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.AdkUtil;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.RootContext;
 import io.github.pheonixhkbxoic.adk.core.edge.ConditionEdge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.node.*;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.AdkTextMessage;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
-import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.session.Session;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +58,12 @@ public class ExecutorTests {
         String appName = "AgentRouter";
         Graph graph = new Graph(appName, start);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
+        AdkPayload payload = AdkPayload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .messages(List.of(AdkTextMessage.of("hello")))
+                .build();
         RootContext rootContext = new RootContext(payload);
         AdkContext ec = executor.execute(graph, rootContext);
         log.info("context: {}", ec);

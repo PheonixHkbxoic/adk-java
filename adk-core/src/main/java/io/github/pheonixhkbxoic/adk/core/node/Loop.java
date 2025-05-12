@@ -1,8 +1,8 @@
 package io.github.pheonixhkbxoic.adk.core.node;
 
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.LoopContext;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.LoopContext;
 import lombok.Getter;
 
 /**

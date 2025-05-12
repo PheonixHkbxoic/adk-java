@@ -1,4 +1,4 @@
-package io.github.pheonixhkbxoic.adk.runtime;
+package io.github.pheonixhkbxoic.adk.message;
 
 import lombok.Data;
 

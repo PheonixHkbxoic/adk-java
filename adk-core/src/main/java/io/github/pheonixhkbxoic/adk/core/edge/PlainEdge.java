@@ -1,7 +1,7 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 import lombok.Getter;
 import lombok.Setter;
 

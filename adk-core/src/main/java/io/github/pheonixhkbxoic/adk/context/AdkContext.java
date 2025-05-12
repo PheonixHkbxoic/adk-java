@@ -1,9 +1,10 @@
-package io.github.pheonixhkbxoic.adk.runtime;
+package io.github.pheonixhkbxoic.adk.context;
 
-import io.github.pheonixhkbxoic.adk.Payload;
 import io.github.pheonixhkbxoic.adk.core.Adk;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
@@ -33,7 +34,7 @@ public interface AdkContext extends Adk {
      */
     LoopContext getLoopContext();
 
-    Payload getPayload();
+    AdkPayload getPayload();
 
     void setResponse(Flux<ResponseFrame> responseFrameFlux);
 

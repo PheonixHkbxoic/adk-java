@@ -1,12 +1,12 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.RootContext;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.Executor;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
-import io.github.pheonixhkbxoic.adk.runtime.RootContext;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
@@ -64,16 +64,16 @@ public abstract class AbstractRunner implements Runner {
     }
 
     @Override
-    public ResponseFrame run(Payload payload) {
+    public List<ResponseFrame> run(AdkPayload payload) {
         RootContext rootContext = new RootContext(payload);
         this.initDefault();
 
         AdkContext ec = executor.execute(graph, rootContext);
-        return ec.getResponse().blockFirst();
+        return ec.getResponse().toStream().toList();
     }
 
     @Override
-    public Flux<ResponseFrame> runAsync(Payload payload) {
+    public Flux<ResponseFrame> runAsync(AdkPayload payload) {
         RootContext rootContext = new RootContext(payload);
         this.initDefault();
 
@@ -95,7 +95,7 @@ public abstract class AbstractRunner implements Runner {
     }
 
     @Override
-    public List<AdkContext> getTaskChainContextList(Payload payload) {
+    public List<AdkContext> getTaskChainContextList(AdkPayload payload) {
         Session session = executor.getSessionService().getSession(appName, payload.getUserId(), payload.getSessionId());
         return session.getTaskContextChain(payload.getTaskId());
     }
@@ -107,7 +107,7 @@ public abstract class AbstractRunner implements Runner {
     }
 
     @Override
-    public void generateTaskPng(Payload payload, OutputStream outputStream) throws IOException {
+    public void generateTaskPng(AdkPayload payload, OutputStream outputStream) throws IOException {
         List<AdkContext> taskChainContextList = this.getTaskChainContextList(payload);
         this.getPlantUmlGenerator().generatePng(taskChainContextList, graph, outputStream);
     }

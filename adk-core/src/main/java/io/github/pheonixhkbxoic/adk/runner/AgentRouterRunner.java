@@ -1,6 +1,6 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
+import io.github.pheonixhkbxoic.adk.core.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.node.*;

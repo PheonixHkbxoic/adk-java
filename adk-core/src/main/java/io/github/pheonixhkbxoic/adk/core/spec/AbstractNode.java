@@ -1,10 +1,10 @@
 package io.github.pheonixhkbxoic.adk.core.spec;
 
 import io.github.pheonixhkbxoic.adk.AdkUtil;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.ReadonlyContext;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.Status;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.ReadonlyContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

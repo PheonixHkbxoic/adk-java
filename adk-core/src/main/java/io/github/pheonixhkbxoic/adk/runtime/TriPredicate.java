@@ -1,4 +1,4 @@
-package io.github.pheonixhkbxoic.adk.core.interfaces;
+package io.github.pheonixhkbxoic.adk.runtime;
 
 /**
  * @author PheonixHkbxoic

@@ -1,7 +1,7 @@
-package io.github.pheonixhkbxoic.adk.runtime;
+package io.github.pheonixhkbxoic.adk.context;
 
 import io.github.pheonixhkbxoic.adk.AdkUtil;
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
 import reactor.core.publisher.Flux;
 
 /**
@@ -11,11 +11,11 @@ import reactor.core.publisher.Flux;
  */
 public class RootContext extends ReadonlyContext {
 
-    public RootContext(Payload payload) {
+    public RootContext(AdkPayload payload) {
         this(AdkUtil.uuid4hex(), "root", payload);
     }
 
-    public RootContext(String id, String name, Payload payload) {
+    public RootContext(String id, String name, AdkPayload payload) {
         super(null, null);
         this.id = id;
         this.name = name;
@@ -24,6 +24,7 @@ public class RootContext extends ReadonlyContext {
             payload.setTaskId(AdkUtil.uuid4hex());
         }
         this.response = Flux.empty();
+        this.setMetadata(payload.getMetadata());
     }
 
 }

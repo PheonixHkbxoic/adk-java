@@ -1,8 +1,8 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.Payload;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -17,15 +17,15 @@ import java.util.function.Consumer;
  */
 public interface Runner {
 
-    ResponseFrame run(Payload payload);
+    List<ResponseFrame> run(AdkPayload payload);
 
-    Flux<ResponseFrame> runAsync(Payload payload);
+    Flux<ResponseFrame> runAsync(AdkPayload payload);
 
     void setExceptionHandler(Consumer<Throwable> exceptionHandler);
 
-    List<AdkContext> getTaskChainContextList(Payload payload);
+    List<AdkContext> getTaskChainContextList(AdkPayload payload);
 
     void generatePng(OutputStream outputStream) throws IOException;
 
-    void generateTaskPng(Payload payload, OutputStream outputStream) throws IOException;
+    void generateTaskPng(AdkPayload payload, OutputStream outputStream) throws IOException;
 }

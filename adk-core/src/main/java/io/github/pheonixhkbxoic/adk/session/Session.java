@@ -1,6 +1,6 @@
 package io.github.pheonixhkbxoic.adk.session;
 
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author PheonixHkbxoic
@@ -18,6 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 public class Session {
     private String sessionId;
     private ConcurrentMap<String, LinkedList<AdkContext>> taskContextChainMap;
+    private ReentrantLock lock = new ReentrantLock();
 
     public Session(String sessionId) {
         this.sessionId = sessionId;
@@ -25,12 +27,17 @@ public class Session {
     }
 
     public void updateSession(String taskId, AdkContext adkContext) {
-        LinkedList<AdkContext> chain = this.getTaskContextChain(taskId);
-        boolean exist = chain.stream().anyMatch(c -> c.getId().equalsIgnoreCase(adkContext.getId()));
-        if (exist) {
-            return;
+        lock.lock();
+        try {
+            LinkedList<AdkContext> chain = this.getTaskContextChain(taskId);
+            boolean exist = chain.stream().anyMatch(c -> c.getId().equalsIgnoreCase(adkContext.getId()));
+            if (exist) {
+                return;
+            }
+            chain.add(adkContext);
+        } finally {
+            lock.unlock();
         }
-        chain.add(adkContext);
     }
 
     public LinkedList<AdkContext> getTaskContextChain(String taskId) {

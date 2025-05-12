@@ -1,16 +1,23 @@
 package io.github.pheonixhkbxoic.adk.test;
 
-import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.AdkUtil;
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.ExecutableContext;
+import io.github.pheonixhkbxoic.adk.context.LoopContext;
+import io.github.pheonixhkbxoic.adk.core.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.core.edge.DefaultRouterSelector;
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.event.InMemoryEventService;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.AdkTextMessage;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runner.AgentLoopRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentParallelRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRouterRunner;
 import io.github.pheonixhkbxoic.adk.runner.AgentRunner;
-import io.github.pheonixhkbxoic.adk.runtime.*;
+import io.github.pheonixhkbxoic.adk.runtime.AdkAgentInvoker;
+import io.github.pheonixhkbxoic.adk.runtime.BranchSelector;
+import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +53,16 @@ public class RunnerTests {
         AdkAgentProvider qa = AdkAgentProvider.create("qaAssistant", new CustomAdkAgentInvoker());
         AgentRunner runner = AgentRunner.of("Assistant", qa).initExecutor(executor);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
+        AdkPayload payload = AdkPayload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .messages(List.of(AdkTextMessage.of("hello")))
+                .build();
 
         // run
-        ResponseFrame responseFrame = runner.run(payload);
-        log.info("run responseFrame: {}", responseFrame);
+        List<ResponseFrame> responseFrames = runner.run(payload);
+        log.info("run responseFrames: {}", responseFrames);
 
     }
 
@@ -61,11 +73,16 @@ public class RunnerTests {
         AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
         AgentRunner runner = AgentRunner.of(appName, qa, qa2).initExecutor(executor);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").build();
+        AdkPayload payload = AdkPayload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .messages(List.of(AdkTextMessage.of("hello")))
+                .build();
 
         // run
-        ResponseFrame responseFrame = runner.run(payload);
-        log.info("agent run responseFrame: {}", responseFrame);
+        List<ResponseFrame> responseFrames = runner.run(payload);
+        log.info("agent run responseFrames: {}", responseFrames);
 
         // gen uml png
         try {
@@ -92,7 +109,13 @@ public class RunnerTests {
         AdkAgentProvider qa2 = AdkAgentProvider.create("qaAssistant2", new CustomAdkAgentInvoker2());
         AgentRunner runner = AgentRunner.of("AgentChain", qa, qa2).initExecutor(executor);
 
-        Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
+        AdkPayload payload = AdkPayload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .messages(List.of(AdkTextMessage.of("hello")))
+                .stream(true)
+                .build();
 
         // runAsync
         runner.runAsync(payload)
@@ -147,13 +170,13 @@ public class RunnerTests {
         AgentRouterRunner runner = AgentRouterRunner.of(appName, qaRouter, branchSelector, fallback, qa, qa2)
                 .initExecutor(executor);
 
-        Payload payload = Payload.builder()
+        AdkPayload payload = AdkPayload.builder()
                 .userId("1")
                 .sessionId("2")
                 .taskId(AdkUtil.uuid4hex())
-                .message("hello")
-                .stream(true)
+                .messages(List.of(AdkTextMessage.of("hello")))
                 .build();
+
 
         // runAsync
         runner.runAsync(payload)
@@ -243,16 +266,16 @@ public class RunnerTests {
         AgentLoopRunner runner = AgentLoopRunner.of(appName, 5, first, second)
                 .initExecutor(executor);
 
-        Payload payload = Payload.builder()
+        AdkPayload payload = AdkPayload.builder()
                 .userId("1")
                 .sessionId("2")
                 .taskId(AdkUtil.uuid4hex())
-                .message("hello")
+                .messages(List.of(AdkTextMessage.of("hello")))
                 .build();
 
         // runAsync
-        ResponseFrame responseFrame = runner.run(payload);
-        log.info("loop runner responseFrame: {}", responseFrame.getMessage());
+        List<ResponseFrame> responseFrames = runner.run(payload);
+        log.info("loop runner responseFrame: {}", responseFrames);
 
         try {
             FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
@@ -304,16 +327,16 @@ public class RunnerTests {
         AgentParallelRunner runner = AgentParallelRunner.of(appName, tasksGeneratorAgent, taskHandlerAgent)
                 .initExecutor(executor);
 
-        Payload payload = Payload.builder()
+        AdkPayload payload = AdkPayload.builder()
                 .userId("1")
                 .sessionId("2")
                 .taskId(AdkUtil.uuid4hex())
-                .message("hello")
+                .messages(List.of(AdkTextMessage.of("hello")))
                 .build();
 
         // runAsync
-        ResponseFrame responseFrame = runner.run(payload);
-        log.info("parallel runner responseFrame: {}", responseFrame.getMessage());
+        List<ResponseFrame> responseFrames = runner.run(payload);
+        log.info("parallel runner responseFrame: {}", responseFrames);
 
         try {
             FileOutputStream file = new FileOutputStream("target/" + appName + ".png");

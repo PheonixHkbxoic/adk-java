@@ -1,6 +1,6 @@
-package io.github.pheonixhkbxoic.adk.core.interfaces;
+package io.github.pheonixhkbxoic.adk.runtime;
 
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
 
 /**
  * @author PheonixHkbxoic

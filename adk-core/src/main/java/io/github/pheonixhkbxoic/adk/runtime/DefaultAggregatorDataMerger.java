@@ -1,8 +1,8 @@
-package io.github.pheonixhkbxoic.adk.core.interfaces;
+package io.github.pheonixhkbxoic.adk.runtime;
 
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.AggregatorContext;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.AggregatorContext;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import reactor.core.publisher.Flux;
 
 import java.util.List;

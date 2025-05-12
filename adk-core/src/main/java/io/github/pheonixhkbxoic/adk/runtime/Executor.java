@@ -1,6 +1,6 @@
 package io.github.pheonixhkbxoic.adk.runtime;
 
-import io.github.pheonixhkbxoic.adk.Payload;
+import io.github.pheonixhkbxoic.adk.context.*;
 import io.github.pheonixhkbxoic.adk.core.State;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
@@ -13,6 +13,8 @@ import io.github.pheonixhkbxoic.adk.event.EventService;
 import io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener;
 import io.github.pheonixhkbxoic.adk.exception.AdkException;
 import io.github.pheonixhkbxoic.adk.exception.PlainEdgeFallbackCountCheckException;
+import io.github.pheonixhkbxoic.adk.message.AdkPayload;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.session.SessionService;
 import lombok.Getter;
@@ -46,7 +48,7 @@ public class Executor {
 
     public AdkContext execute(Graph graph, RootContext rootContext) {
         String appName = graph.getName();
-        Payload payload = rootContext.getPayload();
+        AdkPayload payload = rootContext.getPayload();
         String userId = payload.getUserId();
         String sessionId = payload.getSessionId();
         Session session;
@@ -376,7 +378,7 @@ public class Executor {
             es = Executors.newCachedThreadPool();
         }
         try {
-            Payload payload = currContext.getPayload();
+            AdkPayload payload = currContext.getPayload();
             Session session = this.sessionService.getSession(appName, payload.getUserId(), payload.getSessionId());
 
             // branch parallel execute

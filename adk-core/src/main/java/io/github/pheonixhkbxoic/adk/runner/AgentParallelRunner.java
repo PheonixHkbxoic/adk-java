@@ -1,12 +1,12 @@
 package io.github.pheonixhkbxoic.adk.runner;
 
-import io.github.pheonixhkbxoic.adk.AdkAgentProvider;
+import io.github.pheonixhkbxoic.adk.core.AdkAgentProvider;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
-import io.github.pheonixhkbxoic.adk.core.interfaces.AggregatorDataMerger;
-import io.github.pheonixhkbxoic.adk.core.interfaces.AggregatorNextPredicator;
-import io.github.pheonixhkbxoic.adk.core.interfaces.DefaultAggregatorDataMerger;
-import io.github.pheonixhkbxoic.adk.core.interfaces.DefaultAggregatorNextPredicator;
 import io.github.pheonixhkbxoic.adk.core.node.*;
+import io.github.pheonixhkbxoic.adk.runtime.AggregatorDataMerger;
+import io.github.pheonixhkbxoic.adk.runtime.AggregatorNextPredicator;
+import io.github.pheonixhkbxoic.adk.runtime.DefaultAggregatorDataMerger;
+import io.github.pheonixhkbxoic.adk.runtime.DefaultAggregatorNextPredicator;
 
 /**
  * @author PheonixHkbxoic

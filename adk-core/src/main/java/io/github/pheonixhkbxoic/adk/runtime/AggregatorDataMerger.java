@@ -1,7 +1,7 @@
-package io.github.pheonixhkbxoic.adk.core.interfaces;
+package io.github.pheonixhkbxoic.adk.runtime;
 
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.AggregatorContext;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.AggregatorContext;
 
 import java.util.List;
 import java.util.function.BiConsumer;

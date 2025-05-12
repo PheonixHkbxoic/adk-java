@@ -1,8 +1,8 @@
 package io.github.pheonixhkbxoic.adk.test;
 
+import io.github.pheonixhkbxoic.adk.context.ExecutableContext;
+import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
 import io.github.pheonixhkbxoic.adk.runtime.AdkAgentInvoker;
-import io.github.pheonixhkbxoic.adk.runtime.ExecutableContext;
-import io.github.pheonixhkbxoic.adk.runtime.ResponseFrame;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,11 +17,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class CustomAdkAgentInvoker2 implements AdkAgentInvoker {
-    private List<ResponseFrame> preAgentData;
 
     @Override
     public void beforeInvoke(ExecutableContext context) {
-        preAgentData = context.getResponse().toStream().toList();
+        List<ResponseFrame> preAgentData = context.getResponse().toStream().toList();
         log.info("preAgentData: {}", preAgentData);
     }
 

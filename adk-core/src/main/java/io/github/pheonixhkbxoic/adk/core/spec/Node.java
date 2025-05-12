@@ -1,8 +1,8 @@
 package io.github.pheonixhkbxoic.adk.core.spec;
 
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
 import io.github.pheonixhkbxoic.adk.core.Adk;
 import io.github.pheonixhkbxoic.adk.core.Status;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
 
 /**
  * @author PheonixHkbxoic
@@ -16,6 +16,6 @@ public interface Node extends Adk {
     Status getStatus();
 
     void updateStatus(Status status);
-    
+
     AdkContext buildContextFromParent(AdkContext parent);
 }

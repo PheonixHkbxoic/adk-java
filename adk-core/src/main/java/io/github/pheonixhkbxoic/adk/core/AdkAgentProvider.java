@@ -1,6 +1,6 @@
-package io.github.pheonixhkbxoic.adk;
+package io.github.pheonixhkbxoic.adk.core;
 
-import io.github.pheonixhkbxoic.adk.core.Adk;
+import io.github.pheonixhkbxoic.adk.AdkUtil;
 import io.github.pheonixhkbxoic.adk.runtime.AdkAgentInvoker;
 import lombok.Data;
 

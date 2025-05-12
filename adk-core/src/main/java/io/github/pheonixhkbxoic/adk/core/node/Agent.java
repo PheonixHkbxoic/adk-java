@@ -1,13 +1,13 @@
 package io.github.pheonixhkbxoic.adk.core.node;
 
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
+import io.github.pheonixhkbxoic.adk.context.AgentContext;
 import io.github.pheonixhkbxoic.adk.core.NodeType;
 import io.github.pheonixhkbxoic.adk.core.edge.Edge;
 import io.github.pheonixhkbxoic.adk.core.edge.PlainEdge;
 import io.github.pheonixhkbxoic.adk.core.spec.AbstractChainNode;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
 import io.github.pheonixhkbxoic.adk.runtime.AdkAgentInvoker;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
-import io.github.pheonixhkbxoic.adk.runtime.AgentContext;
 import lombok.Getter;
 
 /**

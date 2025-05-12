@@ -1,8 +1,8 @@
 package io.github.pheonixhkbxoic.adk.core.edge;
 
-import io.github.pheonixhkbxoic.adk.core.interfaces.ConditionEdgePredicate;
+import io.github.pheonixhkbxoic.adk.context.AdkContext;
 import io.github.pheonixhkbxoic.adk.core.spec.Node;
-import io.github.pheonixhkbxoic.adk.runtime.AdkContext;
+import io.github.pheonixhkbxoic.adk.runtime.ConditionEdgePredicate;
 
 /**
  * @author PheonixHkbxoic
