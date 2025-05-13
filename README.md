@@ -85,7 +85,9 @@ AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchS
 
 * custom
     - Use other existing Runner
-    - Custom Runner by `extends AbstractRunner` like `AgentRunner` or `AgentRouterRunner`
+    - Custom Runner by `extends AbstractRunner`
+      like [CustomComplexRunner](https://github.com/PheonixHkbxoic/adk-java/blob/main/adk-core/src/test/java/io/github/pheonixhkbxoic/adk/test/CustomComplexRunner.java)  
+      ![CustomComplexRunner](https://img.plantuml.biz/plantuml/png/vLHDJy904BqtwNyOGqAW2T7ehI2YnEZ1arVZOMZ7jc6xMtUtWX7_kzlj1r1A0cTxsiw-UJDltkxEb4QfyvIvZbsvpkYj9oby7qrT9pE1H2U2W-VDSwL5EXTfncXz7n7NdWS_hWEmam3GYoGHzs4I22QaRpQcayNKKeyFm6gLw20UjC2l8jSaROax61OuW00LGHj8GImih4Qrw8klkvycSxn7dwAEMuJ-DhYF_K365XWiTw5rp2A9XwM-4sLhL4lrH9maQj4j_soT1USpyf1Lynp_ExhZBdIJO6J2KU70uN6DfCWpSnLUXCYg6r1sTEIGSIs_Aqqj2QiuOOVd6GOfhXyp4SGmkOKhs6o0oZ-eDuRGxyD5eXuauPB2isVqYRkJFls-V27BKTCskKbiIR0D-t1zUGDDbpvecLDLqnXYrNVEfRiwftLZPcd2YMOQVDl5t-AT4uPWPZRji_S7)
     - Use low level api about `Executor`
       ```java
       public void customAndRun(){
@@ -106,7 +108,7 @@ AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchS
 * run
 
 ```java
-ResponseFrame responseFrame = runner.run(payload);
+List<ResponseFrame> responseFrames = runner.run(payload);
 ```
 
 * runAsync
@@ -135,15 +137,23 @@ public void testAgentChainRunnerAsync() {
 
 ### Payload
 
-user payload support some key properties:
+User payload support some key properties:
 
 * userId
 * sessionId
 * stream
   When stream is true, Runners will use sse by the method `invokeStream` of AdkAgentInvoker to invoke LLM
+* messages  
+  Supports `AdkTextMessage`,`AdkImageMessage`,`AdkVideoMessage`,`AdkAudioMessage`,`AdkFileMessage`
+* metadata
 
 ```java
-Payload payload = Payload.builder().userId("1").sessionId("2").message("hello").stream(true).build();
+ AdkPayload payload = AdkPayload.builder()
+        .userId("1")
+        .sessionId("2")
+        .taskId(AdkUtil.uuid4hex())
+        .messages(List.of(AdkTextMessage.of("hello")))
+        .build();
 ```
 
 ### How to interact with LLM
@@ -200,14 +210,16 @@ Runner is high level api for Orchestrating your agents and run it synchronously 
   ![AgentRouterRunner](https://img.plantuml.biz/plantuml/png/ZP7D3e8m3CVlItY79bnq2Iy01F4Ll1eFOrGWpWt7Y0VZkxiDyMDguWxBslxwRzUMWs7QZ4SH4V-AI6_lpdHA0gNh1gNPgD6WfXGk4G58jh76UfSKpeWRZIXJoBaIIgSsKEHLuOMo3tWuTuQtYm0-iKb_1Ki70N0s88GKybRvPcOgq7RdUpEFpEn7uhtUaPasg90-dTaRksT2L8mVNj7PvqcKzVJRFoTc-N1ULxSGrKUaj46_dni0)
 * AgentLoopRunner  
   ![AgentLoopRunner](https://img.plantuml.biz/plantuml/png/bLBTQi8m5Bulz1q-AOWjo8RWJLkB2hlR6yWkOdkenPZKc6uTkdTVJ3RTMeNjBZdd-pb_yuDcIZSxxdlsvNlZLQ2eU1bdlbURGAKhAH15YvA4VfQoZY8SVG_uWGE2KX6966akkLInIMJfEhEAIGzSAjdKHf9RjNFade2nLE-9G_oI0Dus5IUCEWICTgnzgcM-GJh38qudaFlXEn5YECIWEYmLiIqL29rUp-1UJNjcHv7yaqQlZ3TCqvLy8NPQi0N7c3nCSQaoXbODVNcIA6ptD-TosrrGwqmDryt_Zoiq-Eu2Fywd8et0t2JjvNm2)
-* AgentParallelRunner
+* AgentParallelRunner  
   ![AgentParallel](https://img.plantuml.biz/plantuml/png/xLEz2i8m4Du3UOU3Bbhe2xIbrab7Tt4usoCMOrAIY8FuxYOjWiOEkegPmdq_zmtVrTQXSUUJv6puSPPj4qFjBgiuw_sWSvrMaAPBGSfjqA2K9DCKhfm1F7414c68L0vbewKskGUgSbyDhiKRsLuwrnnc4TcXFTeLAJBej1bMBc0U-00DMe9Oy00Zz_2cuuGDQrIjfD6--5AFmez5I5VyO_rCh0dbou1KEnRsmz9xVbpvMpWmtNDMUz3Vsnq0)
 
-More Runner is oncoming!
+  You can also custom yourself Runner
+  like [CustomComplexRunner](https://github.com/PheonixHkbxoic/adk-java/blob/main/adk-core/src/test/java/io/github/pheonixhkbxoic/adk/test/CustomComplexRunner.java)  
+  More Runners is oncoming!
 
-### Support output PNG of Graph with PlantUML
+### Support output image of Graph with PlantUML
 
-* generate png image with PlantUmlGenerator and Graph
+* generate kinds of images with `PlantUmlGenerator` and `Graph` by `FileFormat`
 
 ```java
 public void testGenerateUmlPng() {
@@ -217,7 +229,7 @@ public void testGenerateUmlPng() {
         PlantUmlGenerator generator = runner.getPlantUmlGenerator();
         Graph graph = runner.getGraph();
         FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
-        generator.generatePng(graph, file);
+        generator.generate(graph, file, FileFormat.PNG);
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
@@ -233,6 +245,21 @@ public void generatePngImage() {
     try {
         FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
         runner.generatePng(file);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+```
+
+* generate svg image with Runner directly
+
+```java
+public void generateSvgImage() {
+    Runner runner;
+    // gen uml svg
+    try {
+        FileOutputStream file = new FileOutputStream("target/" + appName + ".svg");
+        runner.generateSvg(file);
     } catch (IOException e) {
         throw new RuntimeException(e);
     }

@@ -21,6 +21,7 @@ import io.github.pheonixhkbxoic.adk.runtime.Executor;
 import io.github.pheonixhkbxoic.adk.session.InMemorySessionService;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.extern.slf4j.Slf4j;
+import net.sourceforge.plantuml.FileFormat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -84,12 +85,12 @@ public class RunnerTests {
         List<ResponseFrame> responseFrames = runner.run(payload);
         log.info("agent run responseFrames: {}", responseFrames);
 
-        // gen uml png
+        // gen uml svg
         try {
             PlantUmlGenerator generator = runner.getPlantUmlGenerator();
             Graph graph = runner.getGraph();
-            FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
-            generator.generatePng(graph, file);
+            FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".svg");
+            generator.generate(graph, file, FileFormat.SVG);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -354,4 +355,39 @@ public class RunnerTests {
     }
 
 
+    @Test
+    public void testCustomComplexRunner() {
+
+        String appName = "CustomComplexAgent";
+        CustomComplexRunner runner = new CustomComplexRunner(appName)
+                .initExecutor(executor);
+
+        AdkPayload payload = AdkPayload.builder()
+                .userId("1")
+                .sessionId("2")
+                .taskId(AdkUtil.uuid4hex())
+                .messages(List.of(AdkTextMessage.of("hello")))
+                .build();
+
+        // runAsync
+        List<ResponseFrame> responseFrames = runner.run(payload);
+        for (ResponseFrame responseFrame : responseFrames) {
+            log.info("custom complex runner responseFrame: {}", responseFrame);
+        }
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + ".png");
+            runner.generatePng(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            FileOutputStream file = new FileOutputStream("target/" + appName + "_" + payload.getTaskId() + ".png");
+            runner.generateTaskPng(payload, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }

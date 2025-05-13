@@ -22,7 +22,7 @@ public interface NodeInvoker {
     default void beforeInvoke(ExecutableContext context) {
         Logger log = LoggerFactory.getLogger(this.getClass());
         Flux<ResponseFrame> lastAgentDataFlux = context.getResponse();
-        lastAgentDataFlux.subscribe(responseFrame -> log.info("before invoke response: {}", responseFrame));
+        lastAgentDataFlux.subscribe(responseFrame -> log.info("before invoke response: {}, context:{}", responseFrame, context.getName()));
     }
 
     Mono<ResponseFrame> invoke(ExecutableContext context);

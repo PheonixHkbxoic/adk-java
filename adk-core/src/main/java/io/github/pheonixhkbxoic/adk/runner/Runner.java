@@ -3,6 +3,7 @@ package io.github.pheonixhkbxoic.adk.runner;
 import io.github.pheonixhkbxoic.adk.context.AdkContext;
 import io.github.pheonixhkbxoic.adk.message.AdkPayload;
 import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
+import net.sourceforge.plantuml.FileFormat;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -25,7 +26,26 @@ public interface Runner {
 
     List<AdkContext> getTaskChainContextList(AdkPayload payload);
 
-    void generatePng(OutputStream outputStream) throws IOException;
+    void generate(OutputStream outputStream, FileFormat format) throws IOException;
 
-    void generateTaskPng(AdkPayload payload, OutputStream outputStream) throws IOException;
+    void generateTask(AdkPayload payload, OutputStream outputStream, FileFormat format) throws IOException;
+
+    default void generatePng(OutputStream outputStream) throws IOException {
+        this.generate(outputStream, FileFormat.PNG);
+    }
+
+
+    default void generateTaskPng(AdkPayload payload, OutputStream outputStream) throws IOException {
+        this.generateTask(payload, outputStream, FileFormat.PNG);
+    }
+
+    default void generateSvg(OutputStream outputStream) throws IOException {
+        this.generate(outputStream, FileFormat.SVG);
+    }
+
+    default void generateTaskSvg(AdkPayload payload, OutputStream outputStream) throws IOException {
+        this.generateTask(payload, outputStream, FileFormat.SVG);
+    }
+
+
 }

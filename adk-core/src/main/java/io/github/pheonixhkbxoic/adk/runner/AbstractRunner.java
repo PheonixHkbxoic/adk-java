@@ -12,6 +12,7 @@ import io.github.pheonixhkbxoic.adk.session.Session;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.sourceforge.plantuml.FileFormat;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -101,14 +102,15 @@ public abstract class AbstractRunner implements Runner {
     }
 
     @Override
-    public void generatePng(OutputStream outputStream) throws IOException {
+    public void generate(OutputStream outputStream, FileFormat format) throws IOException {
         PlantUmlGenerator generator = this.getPlantUmlGenerator();
-        generator.generatePng(graph, outputStream);
+        generator.generate(graph, outputStream, format);
     }
 
+
     @Override
-    public void generateTaskPng(AdkPayload payload, OutputStream outputStream) throws IOException {
+    public void generateTask(AdkPayload payload, OutputStream outputStream, FileFormat format) throws IOException {
         List<AdkContext> taskChainContextList = this.getTaskChainContextList(payload);
-        this.getPlantUmlGenerator().generatePng(taskChainContextList, graph, outputStream);
+        this.getPlantUmlGenerator().generate(taskChainContextList, graph, outputStream, format);
     }
 }

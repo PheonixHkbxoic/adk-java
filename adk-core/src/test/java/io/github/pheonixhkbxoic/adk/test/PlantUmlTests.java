@@ -2,6 +2,7 @@ package io.github.pheonixhkbxoic.adk.test;
 
 import io.github.pheonixhkbxoic.adk.core.node.Graph;
 import io.github.pheonixhkbxoic.adk.uml.PlantUmlGenerator;
+import net.sourceforge.plantuml.FileFormat;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileOutputStream;
@@ -20,7 +21,7 @@ public class PlantUmlTests {
         Graph graph = new Graph(null, null);
         try {
             FileOutputStream file = new FileOutputStream("target/" + graph.getName() + ".png");
-            gen.generatePng(graph, file);
+            gen.generate(graph, file, FileFormat.PNG);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
