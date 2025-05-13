@@ -86,8 +86,7 @@ AgentRouterRunner runner = AgentRouterRunner.of("AgentRouter", qaRouter, branchS
 * custom
     - Use other existing Runner
     - Custom Runner by `extends AbstractRunner`
-      like [CustomComplexRunner](https://github.com/PheonixHkbxoic/adk-java/blob/main/adk-core/src/test/java/io/github/pheonixhkbxoic/adk/test/CustomComplexRunner.java)  
-      ![CustomComplexRunner](https://img.plantuml.biz/plantuml/png/vLHDJy904BqtwNyOGqAW2T7ehI2YnEZ1arVZOMZ7jc6xMtUtWX7_kzlj1r1A0cTxsiw-UJDltkxEb4QfyvIvZbsvpkYj9oby7qrT9pE1H2U2W-VDSwL5EXTfncXz7n7NdWS_hWEmam3GYoGHzs4I22QaRpQcayNKKeyFm6gLw20UjC2l8jSaROax61OuW00LGHj8GImih4Qrw8klkvycSxn7dwAEMuJ-DhYF_K365XWiTw5rp2A9XwM-4sLhL4lrH9maQj4j_soT1USpyf1Lynp_ExhZBdIJO6J2KU70uN6DfCWpSnLUXCYg6r1sTEIGSIs_Aqqj2QiuOOVd6GOfhXyp4SGmkOKhs6o0oZ-eDuRGxyD5eXuauPB2isVqYRkJFls-V27BKTCskKbiIR0D-t1zUGDDbpvecLDLqnXYrNVEfRiwftLZPcd2YMOQVDl5t-AT4uPWPZRji_S7)
+      like [CustomComplexRunner](https://github.com/PheonixHkbxoic/adk-java/blob/main/adk-core/src/test/java/io/github/pheonixhkbxoic/adk/test/CustomComplexRunner.java)
     - Use low level api about `Executor`
       ```java
       public void customAndRun(){
@@ -212,10 +211,11 @@ Runner is high level api for Orchestrating your agents and run it synchronously 
   ![AgentLoopRunner](https://img.plantuml.biz/plantuml/png/bLBTQi8m5Bulz1q-AOWjo8RWJLkB2hlR6yWkOdkenPZKc6uTkdTVJ3RTMeNjBZdd-pb_yuDcIZSxxdlsvNlZLQ2eU1bdlbURGAKhAH15YvA4VfQoZY8SVG_uWGE2KX6966akkLInIMJfEhEAIGzSAjdKHf9RjNFade2nLE-9G_oI0Dus5IUCEWICTgnzgcM-GJh38qudaFlXEn5YECIWEYmLiIqL29rUp-1UJNjcHv7yaqQlZ3TCqvLy8NPQi0N7c3nCSQaoXbODVNcIA6ptD-TosrrGwqmDryt_Zoiq-Eu2Fywd8et0t2JjvNm2)
 * AgentParallelRunner  
   ![AgentParallel](https://img.plantuml.biz/plantuml/png/xLEz2i8m4Du3UOU3Bbhe2xIbrab7Tt4usoCMOrAIY8FuxYOjWiOEkegPmdq_zmtVrTQXSUUJv6puSPPj4qFjBgiuw_sWSvrMaAPBGSfjqA2K9DCKhfm1F7414c68L0vbewKskGUgSbyDhiKRsLuwrnnc4TcXFTeLAJBej1bMBc0U-00DMe9Oy00Zz_2cuuGDQrIjfD6--5AFmez5I5VyO_rCh0dbou1KEnRsmz9xVbpvMpWmtNDMUz3Vsnq0)
-
-  You can also custom yourself Runner
+* Custom yourself Runner
   like [CustomComplexRunner](https://github.com/PheonixHkbxoic/adk-java/blob/main/adk-core/src/test/java/io/github/pheonixhkbxoic/adk/test/CustomComplexRunner.java)  
-  More Runners is oncoming!
+  ![CustomComplexRunner](https://img.plantuml.biz/plantuml/png/vLHDJy904BqtwNyOGqAW2T7ehI2YnEZ1arVZOMZ7jc6xMtUtWX7_kzlj1r1A0cTxsiw-UJDltkxEb4QfyvIvZbsvpkYj9oby7qrT9pE1H2U2W-VDSwL5EXTfncXz7n7NdWS_hWEmam3GYoGHzs4I22QaRpQcayNKKeyFm6gLw20UjC2l8jSaROax61OuW00LGHj8GImih4Qrw8klkvycSxn7dwAEMuJ-DhYF_K365XWiTw5rp2A9XwM-4sLhL4lrH9maQj4j_soT1USpyf1Lynp_ExhZBdIJO6J2KU70uN6DfCWpSnLUXCYg6r1sTEIGSIs_Aqqj2QiuOOVd6GOfhXyp4SGmkOKhs6o0oZ-eDuRGxyD5eXuauPB2isVqYRkJFls-V27BKTCskKbiIR0D-t1zUGDDbpvecLDLqnXYrNVEfRiwftLZPcd2YMOQVDl5t-AT4uPWPZRji_S7)
+
+More Runners is oncoming!
 
 ### Support output image of Graph with PlantUML
 
