@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PlantUmlGenerator {
     private String indentStr = "  ";
     private String activeLabelBgStyle = "#green";
+    private String errorLabelBgStyle = "#pink";
     private String activeLabelStyle = "<color:red><b>";
     private String activeArrowStyle = "-[#red]->";
 
@@ -182,39 +183,63 @@ public class PlantUmlGenerator {
         contextIndex.incrementAndGet();
         StringBuilder uml = new StringBuilder();
         if (node instanceof Graph) {
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            if (contextIndex.get() < contextList.size()) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            }
             uml.append(repeat(indent)).append(String.format("partition **%s** {", node.getName())).append("\n");
             uml.append(this.buildUmlNode(contextList, contextIndex, ((Graph) node).getStart(), indent, suffix));
             uml.append(repeat(indent)).append("}").append("\n");
         } else if (node instanceof Loop) {
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            if (contextIndex.get() < contextList.size() - 1) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            }
             uml.append(repeat(indent)).append(String.format("group **%s**", node.getName())).append("\n");
             // loop
             indent++;
-            uml.append(repeat(indent)).append(String.format("%s: %s%s;", activeLabelBgStyle, activeLabelStyle, "entry")).append("\n");
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
-            uml.append(repeat(indent)).append(String.format("while ( %s (maxEpoch <= 0 || epoch < maxEpoch) && !isBreaked )", activeLabelStyle)).append("\n");
+            if (contextIndex.get() < contextList.size() - 1) {
+                uml.append(repeat(indent)).append(String.format("%s: %s%s;", getLabelBgStyle(contextList, contextIndex), activeLabelStyle, "entry")).append("\n");
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                uml.append(repeat(indent)).append(String.format("while ( %s (maxEpoch <= 0 || epoch < maxEpoch) && !isBreaked )", activeLabelStyle)).append("\n");
+            } else {
+                uml.append(repeat(indent)).append(String.format(": %s;", "entry")).append("\n");
+                uml.append(repeat(indent)).append("while ( (maxEpoch <= 0 || epoch < maxEpoch) && !isBreaked )").append("\n");
+            }
             int loopContextIndex = contextIndex.get();
             uml.append(this.buildUmlNode(contextList, contextIndex, ((Group) node).getEntry(), indent, suffix));
             AdkContext adkContext = loopContextIndex >= contextList.size() ? null : contextList.get(loopContextIndex);
             if (adkContext != null) {
                 LoopContext loopContext = (LoopContext) adkContext;
-                uml.append(repeat(indent - 1)).append(activeArrowStyle)
-                        .append(activeLabelStyle)
-                        .append(" epoch: ").append(loopContext.getEpoch() + 1)
-                        .append("/").append(loopContext.getMaxEpoch())
-                        .append(" isBreaked: ").append(loopContext.isBreaked())
-                        .append(";").append("\n");
+                if (contextIndex.get() < contextList.size() - 1) {
+                    uml.append(repeat(indent - 1)).append(activeArrowStyle)
+                            .append(activeLabelStyle)
+                            .append(" epoch: ").append(loopContext.getEpoch() + 1)
+                            .append("/").append(loopContext.getMaxEpoch())
+                            .append(" isBreaked: ").append(loopContext.isBreaked())
+                            .append(";").append("\n");
+                } else {
+                    uml.append(repeat(indent - 1))
+                            .append("->")
+                            .append(" epoch: ").append(loopContext.getEpoch() + 1)
+                            .append("/").append(loopContext.getMaxEpoch())
+                            .append(" isBreaked: ").append(loopContext.isBreaked())
+                            .append(";").append("\n");
+                }
             } else {
-                uml.append(repeat(indent - 1)).append(activeArrowStyle).append("\n");
+                if (contextIndex.get() < contextList.size() - 1) {
+                    uml.append(repeat(indent - 1)).append(activeArrowStyle).append("\n");
+                }
             }
             uml.append(repeat(indent)).append("endwhile").append("\n");
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
-            uml.append(repeat(indent)).append(String.format("%s: %s%s;", activeLabelBgStyle, activeLabelStyle, "next")).append("\n");
+            if (contextIndex.get() < contextList.size() - 1) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                uml.append(repeat(indent)).append(String.format("%s: %s%s;", getLabelBgStyle(contextList, contextIndex), activeLabelStyle, "next")).append("\n");
+            } else {
+                uml.append(repeat(indent)).append(String.format(": %s;", "next")).append("\n");
+            }
             uml.append(this.buildUmlNode(((Group) node).getNext(), indent, null));
 
-            // move ": end;" in switch to after "endswitch;"
-            String endInSwitch = activeLabelBgStyle + ": " + activeLabelStyle + "end;\n";
+            // move ": end;" in group to after "end group"
+            String endInSwitch = getLabelBgStyle(contextList, contextIndex) + ": " + activeLabelStyle + "end;\n";
             int endInSwitchIndex = uml.lastIndexOf(endInSwitch);
             if (endInSwitchIndex == -1) {
                 endInSwitch = ": " + "end;\n";
@@ -234,18 +259,38 @@ public class PlantUmlGenerator {
             indent--;
             uml.append(repeat(indent)).append("end group").append("\n");
             if (endInSwitchIndex > -1) {
-                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
-                uml.append(repeat(indent)).append(activeLabelBgStyle).append(": ").append(activeLabelStyle).append("end;").append("\n");
-                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                if (contextIndex.get() < contextList.size() - 1) {
+                    uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                    uml.append(repeat(indent)).append(getLabelBgStyle(contextList, contextIndex)).append(": ").append(activeLabelStyle).append("end;").append("\n");
+                    uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                } else {
+                    uml.append(repeat(indent)).append(": ").append("end;").append("\n");
+                }
             }
         } else if (node instanceof AbstractGroupNode) {
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            if (contextIndex.get() < contextList.size()) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+            }
             uml.append(repeat(indent)).append(String.format("group **%s**", node.getName())).append("\n");
             uml.append(this.buildUmlNode(contextList, contextIndex, ((Group) node).getEntry(), indent, suffix));
             uml.append(repeat(indent)).append("end group").append("\n");
         } else if (node instanceof AbstractBranchesNode) {
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
-            uml.append(repeat(indent)).append(String.format("switch( %s%s? )", activeLabelStyle, node.getName())).append("\n");
+            if (AdkUtil.isEmpty(((AbstractBranchesNode) node).getEdgeList())) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                uml.append(repeat(indent)).append(String.format(": %s%s;", activeLabelStyle, node.getName())).append("\n");
+                uml.append(repeat(indent)).append("note right").append("\n");
+                uml.append(repeat(indent + 1)).append("<color:red><b>Error").append("\n");
+                uml.append(repeat(indent + 1)).append("====").append("\n");
+                uml.append(repeat(indent + 1)).append("Not Found Available Sub Agents, Please Check <color:red><b>Exception").append("\n");
+                uml.append(repeat(indent)).append("end note").append("\n");
+                return uml;
+            }
+            if (contextIndex.get() < contextList.size()) {
+                uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                uml.append(repeat(indent)).append(String.format("switch( %s%s? )", activeLabelStyle, node.getName())).append("\n");
+            } else {
+                uml.append(repeat(indent)).append(String.format("switch( %s? )", node.getName())).append("\n");
+            }
             indent++;
             List<Edge> edgeList = ((AbstractBranchesNode) node).getEdgeList();
             Node suffixNode = this.extractSuffix(((AbstractBranchesNode) node));
@@ -268,15 +313,20 @@ public class PlantUmlGenerator {
 
             indent--;
             uml.append(repeat(indent)).append("endswitch").append("\n");
+
             if (suffixNode != null) {
                 indent--;
                 uml.append(this.buildUmlNode(contextList, contextIndex, suffixNode, indent, null));
             }
         } else if (node instanceof AbstractChainNode) {
-            uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
-            uml.append(repeat(indent)).append(String.format("%s: %s%s;", activeLabelBgStyle, activeLabelStyle, node.getName())).append("\n");
-            if (node instanceof End) {
+            if (contextIndex.get() < contextList.size()) {
                 uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                uml.append(repeat(indent)).append(String.format("%s: %s%s;", getLabelBgStyle(contextList, contextIndex), activeLabelStyle, node.getName())).append("\n");
+                if (node instanceof End) {
+                    uml.append(repeat(indent)).append(activeArrowStyle).append("\n");
+                }
+            } else {
+                uml.append(repeat(indent)).append(String.format(": %s;", node.getName())).append("\n");
             }
             Edge edge = ((AbstractChainNode) node).getEdge();
             if (edge != null) {
@@ -287,13 +337,21 @@ public class PlantUmlGenerator {
         return uml;
     }
 
+    private String getLabelBgStyle(List<AdkContext> contextList, AtomicInteger contextIndex) {
+        if (contextIndex.get() == contextList.size() - 1) {
+            return errorLabelBgStyle;
+        } else if (contextIndex.get() < contextList.size()) {
+            return activeLabelBgStyle;
+        }
+        return "";
+    }
+
     private String repeat(int indent) {
         return indentStr.repeat(indent);
     }
 
     public void generate(Graph graph, OutputStream outputStream, FileFormat format) throws IOException {
         String source = this.generate(graph);
-        System.out.println(source);
         SourceStringReader reader = new SourceStringReader(source);
         reader.outputImage(outputStream, new FileFormatOption(format));
     }
@@ -307,6 +365,7 @@ public class PlantUmlGenerator {
 
     public void generate(List<AdkContext> contextList, Graph graph, OutputStream outputStream, FileFormat format) throws IOException {
         String source = this.generate(contextList, graph);
+        System.out.println("---------------------\n" + source);
         SourceStringReader reader = new SourceStringReader(source);
         reader.outputImage(outputStream, new FileFormatOption(format));
     }

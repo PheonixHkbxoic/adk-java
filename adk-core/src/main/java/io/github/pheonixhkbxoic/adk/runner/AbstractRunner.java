@@ -19,6 +19,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -38,8 +39,13 @@ public abstract class AbstractRunner implements Runner {
     /**
      * 默认异常处理器，记录异常日志
      */
-    public static Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> log.info("exception: {}", e.getMessage(), e);
+    public static Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> {
+    };
 
+    @Override
+    public Consumer<Throwable> getExceptionHandler() {
+        return Optional.ofNullable(exceptionHandler).orElse(DEFAULT_EXCEPTION_HANDLER);
+    }
 
     protected AbstractRunner(String appName) {
         this.appName = appName;
@@ -67,26 +73,43 @@ public abstract class AbstractRunner implements Runner {
     @Override
     public List<ResponseFrame> run(AdkPayload payload) {
         RootContext rootContext = new RootContext(payload);
-        this.initDefault();
+        try {
+            return this.doRun(rootContext)
+                    .doOnError(e -> this.getExceptionHandler().accept(e))
+                    .toStream()
+                    .toList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
 
-        AdkContext ec = executor.execute(graph, rootContext);
-        return ec.getResponse().toStream().toList();
+    @Override
+    public List<ResponseFrame> run(AdkPayload payload, Consumer<Throwable> exceptionHandler) {
+        RootContext rootContext = new RootContext(payload);
+        try {
+            return doRun(rootContext)
+                    .doOnError(e -> Optional.ofNullable(exceptionHandler).orElse(this.getExceptionHandler()).accept(e))
+                    .toStream()
+                    .toList();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     @Override
     public Flux<ResponseFrame> runAsync(AdkPayload payload) {
         RootContext rootContext = new RootContext(payload);
-        this.initDefault();
-
-        AdkContext ec = executor.execute(graph, rootContext);
-        return ec.getResponse()
-                .doOnError(e -> {
-                    if (exceptionHandler == null) {
-                        exceptionHandler = DEFAULT_EXCEPTION_HANDLER;
-                    }
-                    exceptionHandler.accept(e);
-                })
+        return doRun(rootContext)
+                .doOnError(e -> this.getExceptionHandler().accept(e))
                 .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    private Flux<ResponseFrame> doRun(RootContext rootContext) {
+        return Flux.defer(() -> {
+            this.initDefault();
+            AdkContext adkContext = executor.execute(graph, rootContext);
+            return adkContext.getResponse();
+        });
     }
 
 

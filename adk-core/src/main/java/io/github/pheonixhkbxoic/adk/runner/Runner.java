@@ -20,7 +20,11 @@ public interface Runner {
 
     List<ResponseFrame> run(AdkPayload payload);
 
+    List<ResponseFrame> run(AdkPayload payload, Consumer<Throwable> exceptionHandler);
+
     Flux<ResponseFrame> runAsync(AdkPayload payload);
+
+    Consumer<Throwable> getExceptionHandler();
 
     void setExceptionHandler(Consumer<Throwable> exceptionHandler);
 

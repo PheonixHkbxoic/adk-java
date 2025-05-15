@@ -12,6 +12,7 @@ import io.github.pheonixhkbxoic.adk.event.Event;
 import io.github.pheonixhkbxoic.adk.event.EventService;
 import io.github.pheonixhkbxoic.adk.event.LogInvokeEventListener;
 import io.github.pheonixhkbxoic.adk.exception.AdkException;
+import io.github.pheonixhkbxoic.adk.exception.AdkInvokeException;
 import io.github.pheonixhkbxoic.adk.exception.PlainEdgeFallbackCountCheckException;
 import io.github.pheonixhkbxoic.adk.message.AdkPayload;
 import io.github.pheonixhkbxoic.adk.message.ResponseFrame;
@@ -102,6 +103,9 @@ public class Executor {
                         .build();
                 eventService.send(eventAfter);
             } catch (Throwable e) {
+                if (e instanceof AdkInvokeException) {
+                    throw e;
+                }
                 curr.updateStatus(State.of(State.FAILURE));
                 Event eventAfter = Event.builder()
                         .type(Event.Execute)
@@ -462,16 +466,17 @@ public class Executor {
                         .build();
                 eventService.send(eventAfter);
             } catch (Throwable e) {
+                AdkInvokeException adkInvokeException = new AdkInvokeException(e.getMessage(), e);
                 Event eventAfter = Event.builder()
                         .type(Event.INVOKE)
                         .nodeId(curr.getId())
                         .nodeName(curr.getName())
                         .stream(currContext.getPayload().isStream())
                         .complete(true)
-                        .error(e)
+                        .error(adkInvokeException)
                         .build();
                 eventService.send(eventAfter);
-                throw e;
+                throw adkInvokeException;
             }
         }
 

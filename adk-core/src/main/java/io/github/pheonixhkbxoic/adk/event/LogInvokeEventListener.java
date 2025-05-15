@@ -20,10 +20,12 @@ public class LogInvokeEventListener implements RouteEventListener, AgentInvokeEv
 
     @Override
     public void after(Event event) {
-        if (event.isInvoke()) {
-            log.info("after event: {}, {}", event.getType(), event.getNodeName(), event.getError());
+        if (event.getError() != null) {
+            log.error("after event: {}, {}, error: {}", event.getType(), event.getNodeName(), event.getError().getMessage(), event.getError());
+        } else if (event.isInvoke()) {
+            log.info("after event: {}, {}", event.getType(), event.getNodeName());
         } else {
-            log.debug("after event: {}, {}", event.getType(), event.getNodeName(), event.getError());
+            log.debug("after event: {}, {}", event.getType(), event.getNodeName());
         }
     }
 }
